@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include "planner.h"
+#include "rrt_planner.h"
 
 int main(int argc, char* argv[]) {
     // ROS init
@@ -7,7 +7,7 @@ int main(int argc, char* argv[]) {
     ros::NodeHandle nh;
 
     // Create Planner class for node's ROS interfaces and path planning
-    Planner planner(nh);
+    RrtPlanner rrtPlanner(nh);
 
     ROS_INFO("Planner node started");
 

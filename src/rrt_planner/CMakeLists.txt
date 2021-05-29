@@ -11,6 +11,9 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   nav_msgs
 )
+#find_package(Boost REQUIRED COMPONENTS thread)
+
+link_directories(${catkin_LIBRARY_DIRS})
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -115,8 +118,16 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+ include
   ${catkin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
+)
+
+set(rrt_planner_SRCS
+  src/rrt_planner.cpp
+)
+set(mapserver_SRCS
+  src/lodepng/lodepng.cpp
 )
 
 ## Declare a C++ library
@@ -132,7 +143,8 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/rrt_planner_node.cpp)
+add_executable(planner_node ${rrt_planner_SRCS} src/planner_node.cpp)
+add_executable(mapserver_node ${mapserver_SRCS} src/mapserver_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -145,9 +157,16 @@ include_directories(
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
+ target_link_libraries(planner_node
+   ${catkin_LIBRARIES}
+ )
+ target_link_libraries(mapserver_node
+   ${catkin_LIBRARIES}
+ )
+
+add_dependencies(planner_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_dependencies(mapserver_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##

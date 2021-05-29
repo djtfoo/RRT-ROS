@@ -1,2 +1,2 @@
 # List of coordinates along path
-Coord2D[] path
+PathNode[] path   # starting node of path

@@ -1,4 +1,7 @@
+#include <ros/ros.h>
+
 #include "rrt_planner.h"
+#include "rrt/rrt.h"
 
 // Constructor
 RrtPlanner::RrtPlanner(ros::NodeHandle& nh) {
@@ -20,12 +23,17 @@ void RrtPlanner::publishPath(std::vector<nav_msgs::PathNode>& path) {
 
 // Subscriber callback
 void RrtPlanner::mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map) {
-
+    ROS_INFO("WEW");
 }
 
 // Path planner algorithm (RRT)
-void RrtPlanner::planPath() {
+void RrtPlanner::planPath(const Coord& start, const Coord& end) {
 
+    // initialise RRT at start position
+    Rrt node(start, nullptr);
+
+    // compute RRT
+    
 
     // publish the path
     //publishPath();

@@ -6,6 +6,9 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include "lodepng/lodepng.h"
 
+#include <iostream>  // testing only
+#include <sstream>  // testing only
+
 class MapParser {
 public:
     MapParser(ros::NodeHandle& nh) {
@@ -33,6 +36,7 @@ public:
         }
 
         // TODO: check if image is divisible by gridsize?
+        std::cout << width << "," << height << std::endl;
 
         // parse map image into grids
         std::vector<unsigned char> occupanyData;    // occupancy data of map grids
@@ -42,7 +46,8 @@ public:
         nav_msgs::OccupancyGrid og;
         og.width = width;
         og.height = height;
-        og.occupancy = occupanyData;
+        og.gridsize = gridSize;
+        //og.occupancy = occupanyData;
         map_pub_.publish(og);
 
         return true;  // parsed and published map to ROS topic successfully
@@ -53,6 +58,8 @@ private:
     ros::Publisher map_pub_;
 
     void parseMapData(const std::vector<unsigned char>& image, unsigned int width, unsigned int height, unsigned int gridSize, std::vector<unsigned char>& occupanyData) {
+
+        ROS_INFO("Parsing map data ...");
         
         int threshold = ceil(gridSize*gridSize*0.5);    // threshold for whether a grid is an obstacle
         
@@ -64,7 +71,7 @@ private:
                 for (int i = row; i < row+gridSize; ++i) {
                     for (int j = col; j < col+gridSize; ++j) {
                         // compute color of pixel
-                        int pixelIdx = 4*(i*col + j);  // index of pixel's RGBA values
+                        int pixelIdx = 4*(i*height + j);  // index of pixel's RGBA values
                         int color = image[pixelIdx] + image[pixelIdx+1] + image[pixelIdx+2];    // sum of pixel's RGB values
                         // check if pixel is an obstacle
                         if (color/3 > 200)  // obstacle pixel is white
@@ -74,7 +81,9 @@ private:
                 // check if grid is occupied or not: obstacleCount > threshold, it is occupied
                 unsigned char occupied = (obstacleCount >= threshold) ? 1 : 0;
                 occupanyData.push_back(occupied);
+                std::cout << (occupied ? 1 : 0);
             }
+            std::cout << std::endl;
         }
     }
 };
@@ -89,15 +98,26 @@ int main(int argc, char* argv[]) {
     // ROS init
     ros::init(argc, argv, "mapserver_node");
     ros::NodeHandle nh;
+    ros::NodeHandle pnh("~");
 
     // Create MapParser class for node's ROS interfaces and to parse a map image file
     MapParser mp(nh);
 
     ROS_INFO("Map server node started");
+    ros::Duration(1).sleep();  // sleep for 1 second
 
     // Parse arguments
     std::string mf(argv[1]);  // map image file
-    unsigned int gs = static_cast<unsigned int>(*(argv[2]));  // grid size
+    //unsigned int gs = static_cast<unsigned int>(argv[2]);  // grid size
+
+    std::stringstream ss;
+    ss << argv[2];
+
+    unsigned int gs;
+    ss >> gs;
+
+    std::cout << argv[2] << std::endl;
+    std::cout << gs << std::endl;
 
     // Parse map
     bool success = mp.parseMap(

@@ -8,6 +8,8 @@
 
 #include <vector>
 
+#include "rrt/coord.h"
+
 class RrtPlanner
 {
 public:
@@ -16,7 +18,7 @@ public:
 
 protected:
     // plan path
-    void planPath();
+    void planPath(const Coord& start, const Coord& end);
 
     // RRT stuff
     //probably helper funcs to do stuff like compute Voronoi region, get config, collision detection, etc

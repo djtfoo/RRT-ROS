@@ -11,6 +11,11 @@ int main(int argc, char* argv[]) {
 
     ROS_INFO("Planner node started");
 
+    // Get start and end positions
+
+    // Plan path
+    //rrtPlanner.planPath(start, end);
+
     // Don't exit the program
     ros::spin();
 }

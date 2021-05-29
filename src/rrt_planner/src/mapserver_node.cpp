@@ -44,6 +44,7 @@ public:
         
         // publish map to ROS topic
         nav_msgs::OccupancyGrid og;
+        og.name = filename;
         og.width = width;
         og.height = height;
         og.gridsize = gridSize;

@@ -3,6 +3,10 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <rrt_planner/RrtNode.h>
 
+#include "visualizer_window.h"
+
+using namespace cv;
+
 class VisualizerInterface {
 public:
     VisualizerInterface(ros::NodeHandle& nh) {
@@ -15,9 +19,14 @@ private:
     ros::Subscriber map_sub_;  // subscribed to /map topic
     ros::Subscriber rrt_sub_;  // subscribed to /rrtnode topic
 
+    // have a "MapParser" class to create VisualizerWindow and draw out the map
+
     static void mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map) {
 
     }
+
+    // have a "RrtNodeParser" class to draw RRT nodes and edges on VisualizerWindow
+
     static void rrtnodeCallback(const rrt_planner::RrtNode::ConstPtr& rrtNode) {
 
     }
@@ -29,7 +38,7 @@ int main(int argc, char* argv[]) {
     ros::NodeHandle nh;
 
     // Create Visualizer node's ROS interfaces
-    RrtPlanner rrtPlanner(nh);
+    VisualizerInterface visualizerInterface(nh);
 
     ROS_INFO("Visualizer node started");
 

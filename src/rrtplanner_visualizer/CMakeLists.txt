@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(rrt_planner)
+project(rrtplanner_visualizer)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -9,13 +9,7 @@ project(rrt_planner)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  rostime
-  message_generation
-  nav_msgs
 )
-#find_package(Boost REQUIRED COMPONENTS thread)
-
-link_directories(${catkin_LIBRARY_DIRS})
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -51,10 +45,11 @@ link_directories(${catkin_LIBRARY_DIRS})
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
- add_message_files(
-   FILES
-   RrtNode.msg
- )
+# add_message_files(
+#   FILES
+#   Message1.msg
+#   Message2.msg
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -71,11 +66,10 @@ link_directories(${catkin_LIBRARY_DIRS})
 # )
 
 ## Generate added messages and services with any dependencies listed here
- generate_messages(
-   DEPENDENCIES
-   std_msgs  # Or other packages containing msgs
-   nav_msgs
- )
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs  # Or other packages containing msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -108,9 +102,8 @@ link_directories(${catkin_LIBRARY_DIRS})
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES rrt_planner
-#  CATKIN_DEPENDS roscpp
-  CATKIN_DEPENDS message_runtime
+#  LIBRARIES rrtplanner_visualizer
+#  CATKIN_DEPENDS roscpp vision_opencv
 #  DEPENDS system_lib
 )
 
@@ -121,21 +114,13 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
- include
+# include
   ${catkin_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-)
-
-set(rrt_planner_SRCS
-  src/rrt_planner.cpp
-)
-set(mapserver_SRCS
-  src/lodepng/lodepng.cpp
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/rrt_planner.cpp
+#   src/${PROJECT_NAME}/rrtplanner_visualizer.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -146,8 +131,7 @@ set(mapserver_SRCS
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(planner_node ${rrt_planner_SRCS} src/planner_node.cpp)
-add_executable(mapserver_node ${mapserver_SRCS} src/mapserver_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/rrtplanner_visualizer_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -160,16 +144,9 @@ add_executable(mapserver_node ${mapserver_SRCS} src/mapserver_node.cpp)
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(planner_node
-   ${catkin_LIBRARIES}
- )
- target_link_libraries(mapserver_node
-   ${catkin_LIBRARIES}
- )
-
-add_dependencies(planner_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-add_dependencies(mapserver_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(${PROJECT_NAME}_node
+#   ${catkin_LIBRARIES}
+# )
 
 #############
 ## Install ##
@@ -218,7 +195,7 @@ add_dependencies(mapserver_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTE
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_rrt_planner.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_rrtplanner_visualizer.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

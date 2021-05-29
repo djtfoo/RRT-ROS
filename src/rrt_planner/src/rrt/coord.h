@@ -3,11 +3,24 @@
 #ifndef COORD_H_
 #define COORD_H_
 
-struct Coord {
-    unsigned int _x;
-    unsigned int _y;
+#include <math.h>
 
-    Coord(int x, int y) : _x(x), _y(y) {}
+struct Coord {
+    float _x;
+    float _y;
+
+    Coord() : _x(0.f), _y(0.f) {}
+    Coord(float x, float y) : _x(x), _y(y) {}
+
+    bool operator==(const Coord& other) {
+        return floatsEqual(_x, other._x) && floatsEqual(_y, other._y);
+    }
+
+private:
+    static constexpr float epsilon = 0.0001f;
+    static bool floatsEqual(float a, float b) {
+        return abs(a-b) < epsilon;
+    }
 };
 
 

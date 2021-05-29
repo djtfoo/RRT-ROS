@@ -6,8 +6,8 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include "lodepng/lodepng.h"
 
-#include <iostream>  // testing only
-#include <sstream>  // testing only
+#include <iostream>  // for logging
+#include <sstream>
 
 class MapParser {
 public:
@@ -98,7 +98,6 @@ int main(int argc, char* argv[]) {
     // ROS init
     ros::init(argc, argv, "mapserver_node");
     ros::NodeHandle nh;
-    ros::NodeHandle pnh("~");
 
     // Create MapParser class for node's ROS interfaces and to parse a map image file
     MapParser mp(nh);
@@ -106,18 +105,16 @@ int main(int argc, char* argv[]) {
     ROS_INFO("Map server node started");
     ros::Duration(1).sleep();  // sleep for 1 second
 
-    // Parse arguments
+    // Parse map image file argument
     std::string mf(argv[1]);  // map image file
-    //unsigned int gs = static_cast<unsigned int>(argv[2]);  // grid size
-
+    // Parse grid size argument
     std::stringstream ss;
     ss << argv[2];
-
-    unsigned int gs;
+    unsigned int gs;  // grid size
     ss >> gs;
 
-    std::cout << argv[2] << std::endl;
-    std::cout << gs << std::endl;
+    std::cout << "Map file: " << argv[2] << std::endl;
+    std::cout << "Grid size (pixels): " << gs << std::endl;
 
     // Parse map
     bool success = mp.parseMap(

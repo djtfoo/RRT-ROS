@@ -3,6 +3,8 @@
 #include "rrt_planner.h"
 #include "rrt/rrt.h"
 
+nav_msgs::OccupancyGrid::ConstPtr RrtPlanner::map_ = nullptr;
+
 // Constructor
 RrtPlanner::RrtPlanner(ros::NodeHandle& nh) {
     // TODO: sub/advertise options
@@ -23,11 +25,12 @@ void RrtPlanner::publishPath(std::vector<nav_msgs::PathNode>& path) {
 
 // Subscriber callback
 void RrtPlanner::mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map) {
-    ROS_INFO("WEW");
+    ROS_INFO("Map callback");
+    map_ = map;
 }
 
 // Path planner algorithm (RRT)
-void RrtPlanner::planPath(const Coord& start, const Coord& end) {
+void RrtPlanner::planPath(const Coord& start, const Coord& goal) {
 
     // initialise RRT at start position
     Rrt node(start, nullptr);
@@ -40,3 +43,15 @@ void RrtPlanner::planPath(const Coord& start, const Coord& end) {
 }
 
 // RRT helper functions
+void randomState() {
+
+}
+
+void extend(Rrt* rrt, Coord state) {
+    // find node in RRT that is nearest to the state
+    
+    // check if new state is valid
+    // + incrementalStep
+
+        // add new state to RRT
+}

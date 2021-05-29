@@ -47,7 +47,7 @@ public:
         og.width = width;
         og.height = height;
         og.gridsize = gridSize;
-        //og.occupancy = occupanyData;
+        og.occupancy = occupanyData;
         map_pub_.publish(og);
 
         return true;  // parsed and published map to ROS topic successfully
@@ -129,5 +129,7 @@ int main(int argc, char* argv[]) {
         ROS_INFO("Map occupancy grid published to /map successfully.");
 
     // Don't exit the program
-    ros::spin();
+    //ros::spin();
+
+    return 0;
 }

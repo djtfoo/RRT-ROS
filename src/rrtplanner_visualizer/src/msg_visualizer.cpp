@@ -120,16 +120,8 @@ void MsgVisualizer::parsePath(VisualizerWindow* window, const nav_msgs::Path::Co
         std::cout << path->path[i].id << ", ";
 
         // root node
-        if (path->path[i].parent == -1) {
-            // draw start node
-            window->drawCircle(
-                Point(path->path[i].x, path->path[i].y),
-                4,
-                Scalar(0, 255, 255),
-                -1   // FILLED
-            );
+        if (path->path[i].parent == -1)
             continue;
-        }
 
         // there is an edge connecting nodes
         nav_msgs::RrtNode::ConstPtr thisNode = rrtNodes[path->path[i].id];
@@ -138,17 +130,25 @@ void MsgVisualizer::parsePath(VisualizerWindow* window, const nav_msgs::Path::Co
         window->drawLine(
             Point(parent->x, parent->y),
             Point(thisNode->x, thisNode->y),
-            Scalar(0, 255, 255),
+            Scalar(0, 255, 0),  // green
             2
          );
     }
+    std::cout << std::endl;
+    // draw start node
+    int startIdx = path->path.size() - 1;
+    window->drawCircle(
+        Point(path->path[startIdx].x, path->path[startIdx].y),
+        4,
+        Scalar(0, 255, 255),  // yellow
+        -1   // FILLED
+    );
 
     // draw goal node
-    int goalIdx = 0;
     window->drawCircle(
-        Point(path->path[goalIdx].x, path->path[goalIdx].y),
+        Point(path->path[0].x, path->path[0].y),
         3,
-        Scalar(0, 255, 255),
+        Scalar(0, 0, 255),  // red
         -1   // FILLED
     );
 }

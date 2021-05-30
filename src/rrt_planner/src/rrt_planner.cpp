@@ -103,6 +103,7 @@ void RrtPlanner::planPath(const Coord& start, const Coord& goal) {
     for (int i = 0; i < numRegionsX*numRegionsY; ++i) {
         unpopulatedRegions.push_back(i);
     }
+    _incrementalStep = map_->gridsize - 1;
 
     // TODO: sleep only if visualization is true
     ros::Duration(0.25).sleep();

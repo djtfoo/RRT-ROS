@@ -10,6 +10,7 @@ void MsgVisualizer::parseMap(VisualizerWindow** window, const nav_msgs::Occupanc
     std::cout << map->width << ", " << map->height << ", " << (int)map->gridsize << "," << std::endl;
 
     // create window
+    // TODO: mutex
     if (*window != nullptr)
         delete *window;
     *window = new VisualizerWindow(map->name.c_str(), map->width, map->height);
@@ -36,9 +37,6 @@ void MsgVisualizer::parseMap(VisualizerWindow** window, const nav_msgs::Occupanc
              );
         }
     }
-
-    // TODO: draw grid lines
-
 }
 
 void MsgVisualizer::parseRrtNode(VisualizerWindow** window, const rrt_planner::RrtNode::ConstPtr& rrtNode) {

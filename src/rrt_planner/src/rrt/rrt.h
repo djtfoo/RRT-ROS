@@ -13,8 +13,8 @@ class Rrt {
     std::vector<Rrt*> _children;  // children nodes
 
 public:
-    Rrt(float x, float y, Rrt* parent) : _id(-1), _coord(Coord(x, y)), _parent(parent), _children() {}
-    Rrt(const Coord& coord, Rrt* parent) : _id(-1), _coord(coord), _parent(parent), _children() {}
+    Rrt(float x, float y, Rrt* parent) : _id(0), _coord(Coord(x, y)), _parent(parent), _children(0) {}
+    Rrt(const Coord& coord, Rrt* parent) : _id(0), _coord(Coord(coord._x, coord._y)), _parent(parent), _children(0) {}
 
     ~Rrt() {
         while (!_children.empty()) {

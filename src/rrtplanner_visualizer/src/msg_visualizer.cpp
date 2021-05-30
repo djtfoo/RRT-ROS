@@ -2,6 +2,8 @@
 #include <iostream>  // for testing only
 #include <ros/ros.h>  // for testing only
 
+std::map<int, rrt_planner::RrtNode::ConstPtr> MsgVisualizer::rrtNodes;
+
 void MsgVisualizer::parseMap(VisualizerWindow** window, const nav_msgs::OccupancyGrid::ConstPtr& map) {
     std::cout << "Parse Map" << std::endl;
     std::cout << map->name << std::endl;
@@ -41,8 +43,26 @@ void MsgVisualizer::parseMap(VisualizerWindow** window, const nav_msgs::Occupanc
 
 void MsgVisualizer::parseRrtNode(VisualizerWindow** window, const rrt_planner::RrtNode::ConstPtr& rrtNode) {
 
-    // TODO: parse RrtNode msg
+    // check if RRT Node is a root node
+    if (rrtNode->parent == -1)  // node has no parent
+        rrtNodes.clear();
 
+    // add rrtNode to map
+    rrtNodes[rrtNode->id] = rrtNode;
+    std::cout << rrtNode->parent << " | " << rrtNode->id << ": " << rrtNode->x << "," << rrtNode->y << std::endl;
+
+    // draw edge from rrtNode to parent
+    if (rrtNode->parent != -1) {
+        std::cout << "Trying to draw ..." << std::endl;
+        rrt_planner::RrtNode::ConstPtr parent = rrtNodes[rrtNode->parent];
+        std::cout << rrtNode->parent << ": " << parent->x << "," << parent->y << " | " << rrtNode->id << ": " << rrtNode->x << "," << rrtNode->y << std::endl;
+        (*window)->drawLine(
+            Point(parent->x, parent->y),
+            Point(rrtNode->x, rrtNode->y),
+            Scalar(255, 255, 0),
+            1
+         );
+    }
 }
 
 void MsgVisualizer::parsePath(VisualizerWindow** window, const nav_msgs::Path::ConstPtr& path) {

@@ -190,8 +190,20 @@ void RrtPlanner::randomState(Coord* state, Coord* currState, const Coord& goal, 
     // biased coin: 10% probability of sampling goal
     int coin = rand() % 100;
     if (coin < 10) {
-        state->_x = goal._x;
-        state->_y = goal._y;
+        if (coin < 8) {  // sample goal - high chance
+            state->_x = goal._x;
+            state->_y = goal._y;
+        }
+        else {  // TODO: determine if necessary to sample around goal zone
+            bool loop = true;
+            while (loop) {
+                int x = rand() % 5 - 3;
+                int y = rand() % 5 - 3;
+                state->_x = currState->_x + x;
+                state->_y = currState->_y + y;
+                loop = !noCollision(*state);
+            }
+        }
     }
     else {
         // have a high chance of sampling outside occupied regions (split map into multiple small regions)
@@ -259,8 +271,6 @@ int RrtPlanner::extend(Rrt* rrt, const Coord& state, Rrt** xNew, const Coord& go
     }
 
     return STATUS_TRAPPED;
-
-    /* TODO: modification of EXTEND: change to CONNECT */
 }
 
 Rrt* RrtPlanner::nearestNeighbour(Rrt* rrt, const Coord& state) {
@@ -320,7 +330,6 @@ bool RrtPlanner::newState(const Coord& state, Rrt* xNear, float input, Coord* nS
     // instead of clamping points within map boundary, do a collision check
     nState->_x = xNear->getCoord()->_x + vecX;
     nState->_y = xNear->getCoord()->_y + vecY;
-    //}
 
     // check if new state is valid, i.e. no collision detected
     return noCollision(*nState);

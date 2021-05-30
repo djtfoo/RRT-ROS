@@ -48,6 +48,7 @@ find_package(catkin REQUIRED COMPONENTS message_generation)
    OccupancyGrid.msg
    RrtNode.msg
    Path.msg
+   PathRequest.msg
  )
 
 ## Generate services in the 'srv' folder

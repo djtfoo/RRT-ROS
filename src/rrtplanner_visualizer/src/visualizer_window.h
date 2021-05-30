@@ -20,6 +20,7 @@ public:
     void displayWindow();
 
     // draw shapes
+    void drawCircle(const Point& center, int radius, const Scalar& color, int thickness);
     void drawRectangle(const Point& min, const Point& max, const Scalar& color, int thickness);
     void drawLine(const Point& start, const Point& end, const Scalar& color, int thickness);
 };

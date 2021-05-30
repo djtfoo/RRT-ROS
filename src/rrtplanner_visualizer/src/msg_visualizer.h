@@ -4,6 +4,7 @@
 #include <map>
 
 #include <nav_msgs/OccupancyGrid.h>
+#include <nav_msgs/PathRequest.h>
 #include <nav_msgs/RrtNode.h>
 #include <nav_msgs/Path.h>
 
@@ -16,8 +17,9 @@ class MsgVisualizer {
 
 public:
     static void parseMap(VisualizerWindow** window, const nav_msgs::OccupancyGrid::ConstPtr& map);
-    static void parseRrtNode(VisualizerWindow** window, const nav_msgs::RrtNode::ConstPtr& rrtNode);
-    static void parsePath(VisualizerWindow** window, const nav_msgs::Path::ConstPtr& path);
+    static void parsePathRequest(VisualizerWindow* window, const nav_msgs::PathRequest::ConstPtr& pathreq);
+    static void parseRrtNode(VisualizerWindow* window, const nav_msgs::RrtNode::ConstPtr& rrtNode);
+    static void parsePath(VisualizerWindow* window, const nav_msgs::Path::ConstPtr& path);
 
 };
 

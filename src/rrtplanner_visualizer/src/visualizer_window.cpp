@@ -16,6 +16,16 @@ void VisualizerWindow::displayWindow() {
     waitKey(10);
 }
 
+void VisualizerWindow::drawCircle(const Point& center, int radius, const Scalar& color, int thickness) {
+    circle(_img,
+        center,
+        radius,
+        color,
+        thickness,
+        LINE_8
+    );
+}
+
 void VisualizerWindow::drawRectangle(const Point& min, const Point& max, const Scalar& color, int thickness)
 {
     rectangle(_img,

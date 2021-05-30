@@ -39,7 +39,25 @@ void MsgVisualizer::parseMap(VisualizerWindow** window, const nav_msgs::Occupanc
     }
 }
 
-void MsgVisualizer::parseRrtNode(VisualizerWindow** window, const nav_msgs::RrtNode::ConstPtr& rrtNode) {
+void MsgVisualizer::parsePathRequest(VisualizerWindow* window, const nav_msgs::PathRequest::ConstPtr& pathreq) {
+    // draw start node
+    window->drawCircle(
+        Point(pathreq->start_x, pathreq->start_y),
+        3,
+        Scalar(255, 255, 0),
+        -1   // FILLED
+    );
+
+    // draw goal node
+    window->drawCircle(
+        Point(pathreq->goal_x, pathreq->goal_y),
+        2,
+        Scalar(255, 255, 0),
+        -1   // FILLED
+    );
+}
+
+void MsgVisualizer::parseRrtNode(VisualizerWindow* window, const nav_msgs::RrtNode::ConstPtr& rrtNode) {
 
     // check if RRT Node is a root node
     if (rrtNode->parent == -1)  // node has no parent
@@ -53,7 +71,7 @@ void MsgVisualizer::parseRrtNode(VisualizerWindow** window, const nav_msgs::RrtN
         std::cout << "Trying to draw ..." << std::endl;
         nav_msgs::RrtNode::ConstPtr parent = rrtNodes[rrtNode->parent];
         std::cout << rrtNode->parent << ": " << parent->x << "," << parent->y << " | " << rrtNode->id << ": " << rrtNode->x << "," << rrtNode->y << std::endl;
-        (*window)->drawLine(
+        window->drawLine(
             Point(parent->x, parent->y),
             Point(rrtNode->x, rrtNode->y),
             Scalar(255, 255, 0),
@@ -62,23 +80,34 @@ void MsgVisualizer::parseRrtNode(VisualizerWindow** window, const nav_msgs::RrtN
     }
 }
 
-void MsgVisualizer::parsePath(VisualizerWindow** window, const nav_msgs::Path::ConstPtr& path) {
+void MsgVisualizer::parsePath(VisualizerWindow* window, const nav_msgs::Path::ConstPtr& path) {
 
-    // sleep for a short time to allow map to remain visible
-    ros::Duration(1.f).sleep();
+    // allow map to remain visible for a slightly longer time
+    ros::Duration(0.5f).sleep();
 
     std::cout << "Path: " << std::endl;
     // draw path with a different color and thickness
     for (int i = path->path.size() - 1; i >= 0; --i) {
         // print id of current node
         std::cout << path->path[i].id << ", ";
-        if (path->path[i].parent == -1)
+
+        // root node
+        if (path->path[i].parent == -1) {
+            // draw start node
+            window->drawCircle(
+                Point(path->path[i].x, path->path[i].y),
+                4,
+                Scalar(0, 255, 255),
+                -1   // FILLED
+            );
             continue;
+        }
+
+        // there is an edge connecting nodes
         nav_msgs::RrtNode::ConstPtr thisNode = rrtNodes[path->path[i].id];
         nav_msgs::RrtNode::ConstPtr parent = rrtNodes[path->path[i].parent];
-
         // draw line
-        (*window)->drawLine(
+        window->drawLine(
             Point(parent->x, parent->y),
             Point(thisNode->x, thisNode->y),
             Scalar(0, 255, 255),
@@ -86,6 +115,12 @@ void MsgVisualizer::parsePath(VisualizerWindow** window, const nav_msgs::Path::C
          );
     }
 
-    // TODO: draw start and end nodes as circles
-
+    // draw goal node
+    int goalIdx = 0;
+    window->drawCircle(
+        Point(path->path[goalIdx].x, path->path[goalIdx].y),
+        3,
+        Scalar(0, 255, 255),
+        -1   // FILLED
+    );
 }

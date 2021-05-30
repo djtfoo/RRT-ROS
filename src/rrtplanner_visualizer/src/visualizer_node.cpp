@@ -13,6 +13,7 @@ public:
     VisualizerInterface(ros::NodeHandle& nh)
     {
         map_sub_ = nh.subscribe("map", 1, mapCallback);
+        pathreq_sub_ = nh.subscribe("pathreq", 1, pathreqCallback);
         rrt_sub_ = nh.subscribe("rrtnode", 1, rrtnodeCallback);
         path_sub_ = nh.subscribe("path", 1, pathCallback);
     }
@@ -35,6 +36,7 @@ private:
 
     // Subscriber
     ros::Subscriber map_sub_;  // subscribed to /map topic
+    ros::Subscriber pathreq_sub_;  // subscribed to /pathreq topic
     ros::Subscriber rrt_sub_;  // subscribed to /rrtnode topic
     ros::Subscriber path_sub_;  // subscribed to /path topic
 
@@ -43,13 +45,26 @@ private:
         // have a "Map Parser" to create VisualizerWindow and draw out the map
         MsgVisualizer::parseMap(&window_, map);
     }
+    static void pathreqCallback(const nav_msgs::PathRequest::ConstPtr& pathreq) {
+        // have a "Path Request Parser" to draw start and goal nodes on VisualizerWindow
+        if (window_ != nullptr)
+            MsgVisualizer::parsePathRequest(window_, pathreq);
+        else
+            ROS_INFO("Received message from /pathreq, but no window is currently open.");
+    }
     static void rrtnodeCallback(const nav_msgs::RrtNode::ConstPtr& rrtNode) {
         // have a "RrtNode Parser" to draw RRT nodes and edges on VisualizerWindow
-        MsgVisualizer::parseRrtNode(&window_, rrtNode);
+        if (window_ != nullptr)
+            MsgVisualizer::parseRrtNode(window_, rrtNode);
+        else
+            ROS_INFO("Received message from /rrtnode, but no window is currently open.");
     }
     static void pathCallback(const nav_msgs::Path::ConstPtr& path) {
         // have a "Path Parser" to draw Path on VisualizerWindow
-        MsgVisualizer::parsePath(&window_, path);
+        if (window_ != nullptr)
+            MsgVisualizer::parsePath(window_, path);
+        else
+            ROS_INFO("Received message from /path, but no window is currently open.");
     }
 };
 

@@ -40,7 +40,9 @@ public:
             int grid_y = mouseY / map_->gridsize;
 
             // check if grid is valid
-            if (!PathRequestHandler::isObstacle(map_, grid_x, grid_y)) {
+            if (!PathRequestHandler::isObstacle(map_, grid_x, grid_y) &&  // selected grid is not an obstacle
+                (grid_x != goalX_ && grid_y != goalY_))  // does not overlap with goal grid
+            {
                 // clear fill of previous grid
                 if (startX_ != -1 && startY_ != -1)
                     PathRequestHandler::clearGrid(window_, startX_, startY_, map_->gridsize);
@@ -60,7 +62,9 @@ public:
             int grid_y = mouseY / map_->gridsize;
 
             // check if grid is valid
-            if (!PathRequestHandler::isObstacle(map_, grid_x, grid_y)) {
+            if (!PathRequestHandler::isObstacle(map_, grid_x, grid_y) &&  // selected grid is not an obstacle
+                (grid_x != startX_ && grid_y != startY_))  // does not overlap with start grid
+            {
                 // clear fill of previous grid
                 if (goalX_ != -1 && goalY_ != -1)
                     PathRequestHandler::clearGrid(window_, goalX_, goalY_, map_->gridsize);
@@ -73,7 +77,7 @@ public:
                 PathRequestHandler::fillGoalGrid(window_, grid_x, grid_y, map_->gridsize);
             }
         }
-}
+    }
 
 private:
     // window

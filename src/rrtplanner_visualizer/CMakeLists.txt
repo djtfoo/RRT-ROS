@@ -4,11 +4,17 @@ project(rrtplanner_visualizer)
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
 
+#set(OpenCV_DIR "/home/beaver/opencv_build/opencv/build/")
+set(OpenCV_DIR "/usr/share/OpenCV/")
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  nav_msgs
+  rrt_planner
+  OpenCV
 )
 
 ## System dependencies are found with CMake's conventions
@@ -103,7 +109,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES rrtplanner_visualizer
-#  CATKIN_DEPENDS roscpp vision_opencv
+  CATKIN_DEPENDS roscpp #vision_opencv
 #  DEPENDS system_lib
 )
 
@@ -114,8 +120,14 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+ include
   ${catkin_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
+)
+
+set(visualizer_SRCS
+  src/visualizer_window.cpp
+  src/msg_visualizer.cpp
 )
 
 ## Declare a C++ library
@@ -132,6 +144,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/rrtplanner_visualizer_node.cpp)
+add_executable(visualizer_node ${visualizer_SRCS} src/visualizer_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -144,9 +157,12 @@ include_directories(
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
+ target_link_libraries(visualizer_node
+   ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES}
+ )
+
+add_dependencies(visualizer_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##

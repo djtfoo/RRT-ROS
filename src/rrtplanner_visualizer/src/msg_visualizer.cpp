@@ -4,7 +4,7 @@
 
 std::map<int, nav_msgs::RrtNode::ConstPtr> MsgVisualizer::rrtNodes;
 
-void MsgVisualizer::parseMap(VisualizerWindow** window, const nav_msgs::OccupancyGrid::ConstPtr& map) {
+void MsgVisualizer::parseMap(VisualizerWindow** window, const nav_msgs::OccupancyGrid::ConstPtr& map, bool showGridLines) {
     std::cout << "Parse Map" << std::endl;
     std::cout << map->name << std::endl;
     std::cout << map->width << ", " << map->height << ", " << (int)map->gridsize << "," << std::endl;
@@ -25,18 +25,46 @@ void MsgVisualizer::parseMap(VisualizerWindow** window, const nav_msgs::Occupanc
             // compute grid coordinate
             int grid_x = i % gridWidth;
             int grid_y = i / gridWidth;
-            // compute min pixel coordinate
-            int pixel_x = grid_x*map->gridsize;
-            int pixel_y = grid_y*map->gridsize;
-            // fill the grid with white
-            (*window)->drawRectangle(
-                Point(pixel_x, pixel_y),
-                Point(pixel_x+map->gridsize, pixel_y+map->gridsize),
+            fillGrid(*window, grid_x, grid_y, map->gridsize, Scalar(255, 255, 255));
+        }
+    }
+
+    // draw grid lines if enabled
+    if (showGridLines) {
+        // draw vertical lines
+        for (int i = 1; i < gridWidth; ++i) {
+            (*window)->drawLine(
+                Point(i*map->gridsize - 1, 0),
+                Point(i*map->gridsize - 1, map->height),
                 Scalar(255,255,255),
-                -1   // FILLED
+                1
+             );
+        }
+        // draw horizontal lines
+        int gridHeight = map->height / map->gridsize;  // no. grids along height
+        for (int i = 1; i < gridHeight; ++i) {
+            (*window)->drawLine(
+                Point(0, i*map->gridsize - 1),
+                Point(map->width, i*map->gridsize - 1),
+                Scalar(255,255,255),
+                1
              );
         }
     }
+}
+
+void MsgVisualizer::fillGrid(VisualizerWindow* window, int gridX, int gridY, int gridsize, const Scalar& color) {
+    // compute min pixel coordinate
+    int pixel_x = gridX * gridsize;
+    int pixel_y = gridY * gridsize;
+    // fill the grid with white
+    window->drawRectangle(
+        Point(pixel_x, pixel_y),
+        Point(pixel_x+gridsize, pixel_y+gridsize),
+        color,
+        -1   // FILLED
+    );
+
 }
 
 void MsgVisualizer::parsePathRequest(VisualizerWindow* window, const nav_msgs::PathRequest::ConstPtr& pathreq) {

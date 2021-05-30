@@ -43,7 +43,7 @@ private:
     // Subscriber callback
     static void mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map) {
         // have a "Map Parser" to create VisualizerWindow and draw out the map
-        MsgVisualizer::parseMap(&window_, map);
+        MsgVisualizer::parseMap(&window_, map, false);
     }
     static void pathreqCallback(const nav_msgs::PathRequest::ConstPtr& pathreq) {
         // have a "Path Request Parser" to draw start and goal nodes on VisualizerWindow

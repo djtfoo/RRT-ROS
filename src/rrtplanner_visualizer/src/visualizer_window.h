@@ -14,8 +14,12 @@ class VisualizerWindow {
     int _width;  // width of window
     int _height; // height of window
 
+    MouseCallback _callback;  // mouse callback function
+
 public:
+    // init
     VisualizerWindow(const char* name, int w, int h);
+    void setMouseCallbackFunc(MouseCallback callback);
 
     void displayWindow();
 

@@ -129,6 +129,9 @@ set(visualizer_SRCS
   src/visualizer_window.cpp
   src/msg_visualizer.cpp
 )
+set(pathrequest_SRCS
+  src/pathrequest/pathrequest_handler.cpp
+)
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
@@ -145,6 +148,7 @@ set(visualizer_SRCS
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/rrtplanner_visualizer_node.cpp)
 add_executable(visualizer_node ${visualizer_SRCS} src/visualizer_node.cpp)
+add_executable(pathrequest_node ${visualizer_SRCS} ${pathrequest_SRCS} src/pathrequest_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -161,8 +165,13 @@ add_executable(visualizer_node ${visualizer_SRCS} src/visualizer_node.cpp)
    ${catkin_LIBRARIES}
    ${OpenCV_LIBRARIES}
  )
+ target_link_libraries(pathrequest_node
+   ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES}
+ )
 
 add_dependencies(visualizer_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(pathrequest_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##

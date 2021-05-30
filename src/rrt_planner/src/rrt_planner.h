@@ -2,10 +2,9 @@
 #define RRT_PLANNER_H_
 
 #include <ros/ros.h>
-#include <nav_msgs/PathNode.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/Path.h>
-#include <rrt_planner/RrtNode.h>
+#include <nav_msgs/RrtNode.h>
 
 #include <vector>
 
@@ -35,7 +34,7 @@ protected:
     static bool noCollision(const Coord& newState);
 
     // publish path
-    static void publishPath(const Rrt& goalNode);
+    static void publishPath(Rrt* goalNode);
 
 private:
     // Subscriber
@@ -59,17 +58,11 @@ private:
     //static Coord end;
     static float _incrementalStep;  // represents input to next state (TBD: change to a class to accommodate nonholonomy/more complicated inputs)
 
-    // random sampling idea 2: bounding box
-    static float minX;
-    static float minY;
-    static float maxX;
-    static float maxY;
     // random sampling idea 3: large region population
     const static int numRegionsX = 10;
     const static int numRegionsY = 10;
     const static int regionSizeX = 50;
     const static int regionSizeY = 50;
-    //static int populationCount[10][10];
     static std::vector<int> unpopulatedRegions;
 };
 

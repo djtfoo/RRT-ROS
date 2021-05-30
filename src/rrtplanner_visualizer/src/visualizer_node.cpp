@@ -2,7 +2,7 @@
 #include <thread>
 
 #include <nav_msgs/OccupancyGrid.h>
-#include <rrt_planner/RrtNode.h>
+#include <nav_msgs/RrtNode.h>
 #include <nav_msgs/Path.h>
 
 #include "visualizer_window.h"
@@ -43,7 +43,7 @@ private:
         // have a "Map Parser" to create VisualizerWindow and draw out the map
         MsgVisualizer::parseMap(&window_, map);
     }
-    static void rrtnodeCallback(const rrt_planner::RrtNode::ConstPtr& rrtNode) {
+    static void rrtnodeCallback(const nav_msgs::RrtNode::ConstPtr& rrtNode) {
         // have a "RrtNode Parser" to draw RRT nodes and edges on VisualizerWindow
         MsgVisualizer::parseRrtNode(&window_, rrtNode);
     }

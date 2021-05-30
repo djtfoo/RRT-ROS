@@ -1,2 +1,2 @@
 # List of coordinates along path
-PathNode[] path   # starting node of path
+RrtNode[] path   # array of nodes in path

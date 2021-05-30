@@ -19,23 +19,6 @@ ros::Publisher RrtPlanner::path_pub_;
 ros::Publisher RrtPlanner::rrt_pub_;
 
 // for RRT state sampling
-float RrtPlanner::minX = 0.f;  // inclusive
-float RrtPlanner::minY = 0.f;  // inclusive
-float RrtPlanner::maxX = 0.f;  // inclusive
-float RrtPlanner::maxY = 0.f;  // inclusive
-/*int RrtPlanner::populationCount[10][10] = {
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-};*/
-
 std::vector<int> RrtPlanner::unpopulatedRegions;
 
 // Constructor
@@ -46,21 +29,52 @@ RrtPlanner::RrtPlanner(ros::NodeHandle& nh) {
 
     // advertise ROS topics
     path_pub_ = nh.advertise<nav_msgs::Path>("path", 1);
-    rrt_pub_ = nh.advertise<rrt_planner::RrtNode>("rrtnode", 1);
+    rrt_pub_ = nh.advertise<nav_msgs::RrtNode>("rrtnode", 1);
 
     // init RNG with random seed
     srand(time(NULL));
 }
 
 // Publish path to ROS topic
-void RrtPlanner::publishPath(const Rrt& goalNode) {
+void RrtPlanner::publishPath(Rrt* goalNode) {
 
+    ROS_INFO("Publishing Path ...");
+
+    // populate path in pathMsg
+    std::cout << "Path from goal: ";
+    std::vector<nav_msgs::RrtNode> path;
+    Rrt* trace = goalNode;
+    while (trace->getParent() != nullptr) {
+        // create node
+        nav_msgs::RrtNode node;
+        node.id = trace->getId();
+        node.x = trace->getCoord()->_x;
+        node.y = trace->getCoord()->_y;
+        node.parent = trace->getParent()->getId();
+        // insert node to path
+        path.push_back(node);
+        std::cout << trace->getId() << " ";
+        // go to next node
+        trace = trace->getParent();
+    }
+    // create root node
+    nav_msgs::RrtNode node;
+    node.id = trace->getId();
+    node.x = trace->getCoord()->_x;
+    node.y = trace->getCoord()->_y;
+    node.parent = -1;
+    // insert root node to path
+    path.push_back(node);
+    std::cout << trace->getId() << std::endl;
+
+    // assign created path
     nav_msgs::Path pathMsg;
-
-    // TODO: populate pathMsg
+    pathMsg.path = path;
 
     // publish pathMsg to topic
     path_pub_.publish(pathMsg);
+
+    ROS_INFO("Published Path.");
 }
 
 // Subscriber callback
@@ -68,11 +82,8 @@ void RrtPlanner::mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map) {
     ROS_INFO("Map callback");
     map_ = map;
 
-    maxX = map->width - 1;   // inclusive
-    maxY = map->height - 1;  // inclusive
-
     // Set start and end positions
-    Coord start(50, 50);
+    Coord start(20, 20);
     Coord end(50, 480);
 
     // Plan path
@@ -99,20 +110,20 @@ void RrtPlanner::planPath(const Coord& start, const Coord& goal) {
     ROS_INFO("Build RRT.");
 
     // compute RRT
-    Rrt* goalNode = buildRrt(&node, 6000, goal);
+    Rrt* goalNode = buildRrt(&node, 10000, goal);
     if (goalNode != nullptr) {  // managed to reach the goal
         // publish the path
-        publishPath(*goalNode);
+        publishPath(goalNode);
     }
 }
 
 void RrtPlanner::publishRrtNode(Rrt* node) {
 
-    ROS_INFO("Publishing RRT Node.");
+    ROS_INFO("Publishing RRT Node ...");
     std::cout << node->getId() << " | " << node->getCoord()->_x << "," << node->getCoord()->_y << std::endl;
 
     // Create RRT node message
-    rrt_planner::RrtNode rrtnode;
+    nav_msgs::RrtNode rrtnode;
 
     rrtnode.id = node->getId();
     rrtnode.x = node->getCoord()->_x;
@@ -152,18 +163,13 @@ Rrt* RrtPlanner::buildRrt(Rrt* rrt, int iters, const Coord& goal) {
             // update RRT state for sampling
             currState = xNew;
             Coord* newCoord = xNew->getCoord();
-            // idea 2: bounding box
-            //minX = fmin(newCoord->_x, minX);
-            //minY = fmin(newCoord->_y, minY);
-            //maxX = fmax(newCoord->_x, maxX);
-            //maxY = fmax(newCoord->_y, maxY);
-            // idea 3: large regions populations
+            // random sampling idea 3: large regions populations
             int xRegion = newCoord->_x / regionSizeX;
             int yRegion = newCoord->_y / regionSizeY;
-            //populationCount[xRegion][yRegion] += 1;
-std::vector<int>::iterator position = std::find(unpopulatedRegions.begin(), unpopulatedRegions.end(), xRegion*numRegionsX + yRegion);
-if (position != unpopulatedRegions.end()) // == element was found
-    unpopulatedRegions.erase(position);
+            // remove region from unpopulated regions list
+            std::vector<int>::iterator position = std::find(unpopulatedRegions.begin(), unpopulatedRegions.end(), xRegion*numRegionsX + yRegion);
+            if (position != unpopulatedRegions.end()) // == element was found
+                unpopulatedRegions.erase(position);
 
             // check if goal is reached
             if (xNew->equalsState(goal))
@@ -181,24 +187,14 @@ if (position != unpopulatedRegions.end()) // == element was found
 }
 
 void RrtPlanner::randomState(Coord* state, Coord* currState, const Coord& goal, int radius) {
-    // TODO: improve random sampling method - simple ways of approximating Voronoi region
-    // idea 1: split map into large regions (e.g. 4 squares), higher probability bias towards sampling points within regions with fewer no. points (proportional probability)
-    // idea 2: within curr state's radius, split into directional regions, same as idea 1 about higher probability bias (i.e. bias towards a certain direction)
-    // idea 3: track bounding box of RRT, very strong bias towards sampling outside the bounding box (maybe just a region outside the bounding box?)
-    // problem: these methods are not encompassing the fact that using Voronoi regions can sample the smaller areas in-between branches - but then again, I guess this is not a problem for pathfinding towards a goal
-
-  // instead of clamping, how about perform collision check and reject the state config?
-
-    // biased coin: 5% probability of sampling goal
+    // biased coin: 10% probability of sampling goal
     int coin = rand() % 100;
     if (coin < 10) {
         state->_x = goal._x;
         state->_y = goal._y;
     }
     else {
-        // idea 4: based on idea 2 - have a high chance of sampling outside occupied regions (split map into multiple small regions)
-
-        // TODO: Problem: inaccessible areas in map count towards unpopulated regions
+        // have a high chance of sampling outside occupied regions (split map into multiple small regions)
         if (coin < 80)
         {
             // randomly pick a region to sample from
@@ -222,65 +218,21 @@ void RrtPlanner::randomState(Coord* state, Coord* currState, const Coord& goal, 
             state->_x = rand() % map_->width;
             state->_y = rand() % map_->height;
         }
-else {
+        else {
 label:
-        int x = 0, y = 0;
-        while (x == 0 && y == 0) {
-            x = rand() % radius - 0.5f*radius;
-            y = rand() % radius - 0.5f*radius;
-        }
-        state->_x = currState->_x + x;
-        state->_y = currState->_y + y;
-        //state->_x = fmin(fmax(currState->_x + x, 0), map_->width - 1);
-        //state->_y = fmin(fmax(currState->_y + y, 0), map_->height - 1);
-        if (!noCollision(*state))
-            goto label;
-        }
-}
-
-        // idea 3: split map into large regions
-
-        // idea 2: bias towards sampling outside RRT bounding box -- idea is decent, but it should have a higher fidelity than a box
-        /*if (minX > 0 && maxX < map_->width - 1 &&
-            minY > 0 && maxY < map_->height - 1 &&
-            coin < 85)
-        {
-            int x = minX, y = minY;
-            while (x >= minX && x <= maxX && y >= minY && y <= maxY) {
-                // ver 1: sample within a region outside the bounding box
-                //x = rand() % (int)(maxX - minX + radius) + minX - 0.5f*radius;
-                //y = rand() % (int)(maxY - minY + radius) + minY - 0.5f*radius;
-                // ver 2: sample anywhere outside the bounding box
-                x = rand() % (map_->width);
-                y = rand() % (map_->height);
+            int x = 0, y = 0;
+            while (x == 0 && y == 0) {
+                x = rand() % radius - 0.5f*radius;
+                y = rand() % radius - 0.5f*radius;
             }
-            state->_x = x;
-            state->_y = y;
+            state->_x = currState->_x + x;
+            state->_y = currState->_y + y;
+            //state->_x = fmin(fmax(currState->_x + x, 0), map_->width - 1);
+            //state->_y = fmin(fmax(currState->_y + y, 0), map_->height - 1);
+            if (!noCollision(*state))
+                goto label;
+            }
         }
-        else {  // sample within RRT bounding box
-            int x = rand() % (int)(maxX - minX) + minX;
-            int y = rand() % (int)(maxY - minY) + minY;
-            state->_x = x;
-            state->_y = y;
-        }*/
-
-        // idea 1: Sample within a small space around current state -- gets stuck
-/*label:
-        int x = 0, y = 0;
-        while (x == 0 && y == 0) {
-            x = rand() % radius - 0.5f*radius;
-            y = rand() % radius - 0.5f*radius;
-        }
-        state->_x = currState->_x + x;
-        state->_y = currState->_y + y;
-        //state->_x = fmin(fmax(currState->_x + x, 0), map_->width - 1);
-        //state->_y = fmin(fmax(currState->_y + y, 0), map_->height - 1);
-        if (!noCollision(*state))
-            goto label;*/
-
-        // idea 0: naive random sampling, just pick a random pixel coordinate -- tree able to grow, but far from optimal, and is slow
-        //state->_x = rand() % (map_->width);
-        //state->_y = rand() % (map_->height);
 
         // TODO: check that it is not obstacle?
 

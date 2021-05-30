@@ -46,7 +46,7 @@ find_package(catkin REQUIRED COMPONENTS message_generation)
  add_message_files(
    FILES
    OccupancyGrid.msg
-   PathNode.msg
+   RrtNode.msg
    Path.msg
  )
 

@@ -2,7 +2,7 @@
 #include <iostream>  // for testing only
 #include <ros/ros.h>  // for testing only
 
-std::map<int, rrt_planner::RrtNode::ConstPtr> MsgVisualizer::rrtNodes;
+std::map<int, nav_msgs::RrtNode::ConstPtr> MsgVisualizer::rrtNodes;
 
 void MsgVisualizer::parseMap(VisualizerWindow** window, const nav_msgs::OccupancyGrid::ConstPtr& map) {
     std::cout << "Parse Map" << std::endl;
@@ -39,7 +39,7 @@ void MsgVisualizer::parseMap(VisualizerWindow** window, const nav_msgs::Occupanc
     }
 }
 
-void MsgVisualizer::parseRrtNode(VisualizerWindow** window, const rrt_planner::RrtNode::ConstPtr& rrtNode) {
+void MsgVisualizer::parseRrtNode(VisualizerWindow** window, const nav_msgs::RrtNode::ConstPtr& rrtNode) {
 
     // check if RRT Node is a root node
     if (rrtNode->parent == -1)  // node has no parent
@@ -47,12 +47,11 @@ void MsgVisualizer::parseRrtNode(VisualizerWindow** window, const rrt_planner::R
 
     // add rrtNode to map
     rrtNodes[rrtNode->id] = rrtNode;
-    std::cout << rrtNode->parent << " | " << rrtNode->id << ": " << rrtNode->x << "," << rrtNode->y << std::endl;
 
     // draw edge from rrtNode to parent
     if (rrtNode->parent != -1) {
         std::cout << "Trying to draw ..." << std::endl;
-        rrt_planner::RrtNode::ConstPtr parent = rrtNodes[rrtNode->parent];
+        nav_msgs::RrtNode::ConstPtr parent = rrtNodes[rrtNode->parent];
         std::cout << rrtNode->parent << ": " << parent->x << "," << parent->y << " | " << rrtNode->id << ": " << rrtNode->x << "," << rrtNode->y << std::endl;
         (*window)->drawLine(
             Point(parent->x, parent->y),
@@ -65,6 +64,28 @@ void MsgVisualizer::parseRrtNode(VisualizerWindow** window, const rrt_planner::R
 
 void MsgVisualizer::parsePath(VisualizerWindow** window, const nav_msgs::Path::ConstPtr& path) {
 
-    // TODO: parse Path msg
+    // sleep for a short time to allow map to remain visible
+    ros::Duration(1.f).sleep();
+
+    std::cout << "Path: " << std::endl;
+    // draw path with a different color and thickness
+    for (int i = path->path.size() - 1; i >= 0; --i) {
+        // print id of current node
+        std::cout << path->path[i].id << ", ";
+        if (path->path[i].parent == -1)
+            continue;
+        nav_msgs::RrtNode::ConstPtr thisNode = rrtNodes[path->path[i].id];
+        nav_msgs::RrtNode::ConstPtr parent = rrtNodes[path->path[i].parent];
+
+        // draw line
+        (*window)->drawLine(
+            Point(parent->x, parent->y),
+            Point(thisNode->x, thisNode->y),
+            Scalar(0, 255, 255),
+            2
+         );
+    }
+
+    // TODO: draw start and end nodes as circles
 
 }

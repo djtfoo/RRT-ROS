@@ -20,7 +20,7 @@ void VisualizerWindow::displayWindow() {
         setMouseCallback(_windowName, _callback);
     }
     moveWindow(_windowName, 0, 200);
-    waitKey(10);
+    waitKey(5);
 }
 
 void VisualizerWindow::drawCircle(const Point& center, int radius, const Scalar& color, int thickness) {

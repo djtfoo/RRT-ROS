@@ -59,10 +59,10 @@ private:
     static float _incrementalStep;  // represents input to next state (TBD: change to a class to accommodate nonholonomy/more complicated inputs)
 
     // random sampling idea 3: large region population
-    const static int numRegionsX = 10;
-    const static int numRegionsY = 10;
-    const static int regionSizeX = 50;
-    const static int regionSizeY = 50;
+    const static int numRegionsX = 20;
+    const static int numRegionsY = 20;
+    const static int regionSizeX = 25;
+    const static int regionSizeY = 25;
     static std::vector<int> unpopulatedRegions;
 };
 

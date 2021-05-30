@@ -13,7 +13,7 @@ void VisualizerWindow::displayWindow() {
     // Show Mat in window
     imshow(_windowName, _img);
     moveWindow(_windowName, 0, 200);
-    waitKey(100);
+    waitKey(10);
 }
 
 void VisualizerWindow::drawRectangle(const Point& min, const Point& max, const Scalar& color, int thickness)

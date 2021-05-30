@@ -49,7 +49,7 @@ void RrtPlanner::mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map) {
     map_ = map;
 
     // Set start and end positions
-    Coord start(52.5, 52.5);
+    Coord start(50, 50);
     Coord end(450, 450);
 
     // Plan path
@@ -71,7 +71,7 @@ void RrtPlanner::planPath(const Coord& start, const Coord& goal) {
     ROS_INFO("Build RRT.");
 
     // compute RRT
-    Rrt* goalNode = buildRrt(&node, 50);
+    Rrt* goalNode = buildRrt(&node, 2000, goal);
     if (goalNode != nullptr) {  // managed to reach the goal
         // publish the path
         publishPath(*goalNode);
@@ -101,11 +101,16 @@ void RrtPlanner::publishRrtNode(Rrt* node) {
 }
 
 // RRT helper functions
-Rrt* RrtPlanner::buildRrt(Rrt* rrt, int iters) {
+Rrt* RrtPlanner::buildRrt(Rrt* rrt, int iters, const Coord& goal) {
+
+    Rrt* currState = rrt;
     for (int i = 1; i <= iters; ++i) {
+    if (currState == nullptr) {
+        ROS_INFO("currState NULL");
+    }
         // sample random state
         Coord xRand;
-        randomState(&xRand);
+        randomState(&xRand, currState->getCoord(), goal, 20);
 
         // extend RRT to xRand
         Rrt* xNew = nullptr;
@@ -115,27 +120,52 @@ Rrt* RrtPlanner::buildRrt(Rrt* rrt, int iters) {
             // TODO: publish only if visualization is true
             // publish new node to ROS topic
             publishRrtNode(xNew);
+
+            currState = xNew;
+            // check if goal is reached
+            if (xNew->equalsState(goal))
+               return xNew;
+
         }
-        if (status == STATUS_REACHED) // success
-            return xNew;  // return RRT node at the goal
+        //if (status == STATUS_REACHED) // don't check this; this is extend's Reached state!
+        //    return xNew;  // return RRT node at the goal
 
         // TODO: sleep only if visualization is true
-        ros::Duration(0.25).sleep();
+        ros::Duration(0.01).sleep();
     }
 
     return nullptr;  // did not manage to reach goal
 }
 
-void RrtPlanner::randomState(Coord* state) {
-    // TODO: improve sampling method
+void RrtPlanner::randomState(Coord* state, Coord* currState, const Coord& goal, int radius) {
+    // TODO: improve random sampling method - simple ways of approximating Voronoi region
+    // idea 1: split map into large regions (e.g. 4 squares), higher probability bias towards sampling points within regions with fewer no. points (proportional probability)
+    // idea 2: within curr state's radius, split into directional regions, same as idea 1 about higher probability bias (i.e. bias towards a certain direction)
+    // idea 3: track bounding box of RRT, very strong bias towards sampling outside the bounding box
 
-    // naive: pick a random coordinate and return the middle coordinate of the grid
+    // biased coin: 5% probability of sampling goal
+    int coin = rand() % 100;
+    if (coin < 5) {
+        state->_x = goal._x;
+        state->_y = goal._y;
+    }
+    else {
+        // Sample within a small space around current state
+        int x = 0, y = 0;
+        while (x == 0 && y == 0) {
+            x = rand() % radius - 0.5f*radius;
+            y = rand() % radius - 0.5f*radius;
+        }
+        state->_x = fmin(fmax(currState->_x + x, 0), map_->width - 1);
+        state->_y = fmin(fmax(currState->_y + y, 0), map_->height - 1);
 
-    // naive: pick a random pixel coordinate
-    state->_x = rand() % (map_->width);
-    state->_y = rand() % (map_->height);
+        // naive: pick a random pixel coordinate
+        //state->_x = rand() % (map_->width);
+        //state->_y = rand() % (map_->height);
 
-    // TODO: check that it is not obstacle
+        // TODO: check that it is not obstacle?
+
+    }
 
 }
 
@@ -212,14 +242,20 @@ bool RrtPlanner::newState(const Coord& state, Rrt* xNear, float input, Coord* nS
     vecX = (vecX / magnitude) * input;
     vecY = (vecY / magnitude) * input;
 
+    // instead of clamping points within map boundary, do a collision check
     nState->_x = xNear->getCoord()->_x + vecX;
     nState->_y = xNear->getCoord()->_y + vecY;
 
     // check if new state is valid, i.e. no collision detected
-    return noCollision(state, *nState);
+    return noCollision(*nState);
 }
 
-bool RrtPlanner::noCollision(const Coord& state, const Coord& newState) { 
+bool RrtPlanner::noCollision(const Coord& newState) {
+
+    // check if newState is out of bounds
+    if (newState._x < 0 || newState._x >= map_->width ||
+        newState._y < 0 || newState._y >= map_->height)
+        return false;
 
     // check if the straight line from state to newState intersects with an obstacle grid
     int gridX = newState._x / map_->gridsize;
@@ -228,5 +264,6 @@ bool RrtPlanner::noCollision(const Coord& state, const Coord& newState) {
     if (map_->occupancy[gridY*gridWidth + gridX])
         return false;
 
+    // else, no collision
     return true;
 }

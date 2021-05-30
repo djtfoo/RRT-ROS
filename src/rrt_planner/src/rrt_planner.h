@@ -23,8 +23,8 @@ public:
 
 protected:
     // RRT helper functions to do stuff like compute Voronoi region, get config, collision detection, etc
-    static Rrt* buildRrt(Rrt* rrt, int iters);
-    static void randomState(Coord* state);
+    static Rrt* buildRrt(Rrt* rrt, int iters, const Coord& goal);
+    static void randomState(Coord* state, Coord* currState, const Coord& goal, int radius);
     static int extend(Rrt* rrt, const Coord& state, Rrt** xNew);
 
     static Rrt* nearestNeighbour(Rrt* rrt, const Coord& state);
@@ -32,7 +32,7 @@ protected:
     static float neighbourDistanceMetric(Rrt* rrt, const Coord& state);
 
     static bool newState(const Coord& state, Rrt* xNear, float input, Coord* nState);
-    static bool noCollision(const Coord& state, const Coord& newState);
+    static bool noCollision(const Coord& newState);
 
     // publish path
     static void publishPath(const Rrt& goalNode);

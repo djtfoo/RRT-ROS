@@ -1,4 +1,5 @@
 #include <ros/ros.h>
+#include <thread>
 
 #include <nav_msgs/OccupancyGrid.h>
 #include <rrt_planner/RrtNode.h>
@@ -6,8 +7,6 @@
 
 #include "visualizer_window.h"
 #include "msg_visualizer.h"
-
-using namespace cv;
 
 class VisualizerInterface {
 public:
@@ -20,6 +19,14 @@ public:
     ~VisualizerInterface() {
         if (window_ != nullptr)
            delete window_;
+    }
+
+    static void refreshWindow() {
+        while (true) {
+            if (window_ != nullptr)
+                window_->displayWindow();
+            ros::Duration(0.1).sleep();  // wait 100ms
+        }
     }
 
 private:
@@ -57,6 +64,9 @@ int main(int argc, char* argv[]) {
     VisualizerInterface visualizerInterface(nh);
 
     ROS_INFO("Visualizer node started");
+
+    // Create visualizer thread
+    std::thread th1(visualizerInterface.refreshWindow);
 
     // Don't exit the program
     ros::spin();

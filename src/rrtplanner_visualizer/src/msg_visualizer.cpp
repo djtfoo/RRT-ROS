@@ -1,6 +1,6 @@
 #include "msg_visualizer.h"
-
-#include <iostream>
+#include <iostream>  // for testing only
+#include <ros/ros.h>  // for testing only
 
 void MsgVisualizer::parseMap(VisualizerWindow** window, const nav_msgs::OccupancyGrid::ConstPtr& map) {
     std::cout << "Parse Map" << std::endl;
@@ -37,8 +37,6 @@ void MsgVisualizer::parseMap(VisualizerWindow** window, const nav_msgs::Occupanc
 
     // TODO: draw grid lines
 
-    // display window
-    (*window)->displayWindow();
 }
 
 void MsgVisualizer::parseRrtNode(VisualizerWindow** window, const rrt_planner::RrtNode::ConstPtr& rrtNode) {

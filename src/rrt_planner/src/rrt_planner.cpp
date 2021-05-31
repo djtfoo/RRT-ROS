@@ -213,7 +213,7 @@ Rrt* RrtPlanner::buildRrt(Rrt* rrt, int iters, const Coord& goal) {
         //    return xNew;  // return RRT node at the goal
 
         // TODO: sleep only if visualization is true
-        ros::Duration(0.005).sleep();
+        ros::Duration(0.002).sleep();
     }
 
     return nullptr;  // did not manage to reach goal
@@ -234,7 +234,7 @@ void RrtPlanner::randomState(Coord* state, Coord* currState, const Coord& goal, 
                 int y = rand() % 5 - 3;
                 state->_x = currState->_x + x;
                 state->_y = currState->_y + y;
-                loop = !noCollision(*state);
+                loop = isObstacle(*state);  // is an obstacle; invalid state
             }
         }
     }
@@ -274,7 +274,7 @@ label:
             state->_y = currState->_y + y;
             //state->_x = fmin(fmax(currState->_x + x, 0), map_->width - 1);
             //state->_y = fmin(fmax(currState->_y + y, 0), map_->height - 1);
-            if (!noCollision(*state))
+            if (isObstacle(*state))  // is an obstacle; invalid state
                 goto label;
             }
         }
@@ -375,10 +375,22 @@ bool RrtPlanner::newState(const Coord& state, Rrt* xNear, float input, Coord* nS
         xNear->getCoord()->_x + unitVecX * 0.5*magnitude);
 
     // check if new state is valid, i.e. input to new state does not intersect with obstacle
-    return noCollision(*nState) && noCollision(midpoint);
+    return noCollision(*(xNear->getCoord()), *nState) && noCollision(*(xNear->getCoord()), midpoint);
 }
 
-bool RrtPlanner::noCollision(const Coord& newState) {
+bool RrtPlanner::isObstacle(const Coord& coord) {
+    int gridX = coord._x / map_->gridsize;
+    int gridY = coord._y / map_->gridsize;
+    int gridWidth = map_->width / map_->gridsize;
+    return map_->occupancy[gridY*gridWidth + gridX];
+}
+
+bool RrtPlanner::isObstacle(int gridX, int gridY) {
+    int gridWidth = map_->width / map_->gridsize;
+    return map_->occupancy[gridY*gridWidth + gridX];
+}
+
+bool RrtPlanner::noCollision(const Coord& startState, const Coord& newState) {
 
     // check if newState is out of bounds
     if (newState._x < 0 || newState._x >= map_->width ||
@@ -386,13 +398,19 @@ bool RrtPlanner::noCollision(const Coord& newState) {
         return false;
 
     // check if the newState is an obstacle grid
-    int gridX = newState._x / map_->gridsize;
-    int gridY = newState._y / map_->gridsize;
-    int gridWidth = map_->width / map_->gridsize;
-    if (map_->occupancy[gridY*gridWidth + gridX])
+    if (isObstacle(newState))
         return false;
 
-    // check Manhattan distance
+    // Check that Manhattan distance from startState to newState exists
+    // (special case: definitely only 2 grids wide to check, so just check the alternate corners)
+    int start_gridX = startState._x / map_->gridsize;
+    int start_gridY = startState._y / map_->gridsize;
+    int new_gridX = newState._x / map_->gridsize;
+    int new_gridY = newState._y / map_->gridsize;
+    if (start_gridX != new_gridX && start_gridY != new_gridY) {
+        if (isObstacle(start_gridX, newState._y) || isObstacle(new_gridX, start_gridY))
+            return false;
+    }
 
     // else, no collision
     return true;

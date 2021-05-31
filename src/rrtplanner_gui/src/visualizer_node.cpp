@@ -38,7 +38,7 @@ public:
         while (true) {
             if (window_ != nullptr)
                 window_->displayWindow();
-            ros::Duration(0.005).sleep();  // wait 5ms
+            ros::Duration(0.002).sleep();  // wait 2ms
         }
     }
 

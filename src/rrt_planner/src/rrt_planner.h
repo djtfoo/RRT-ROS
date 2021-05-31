@@ -32,7 +32,7 @@ protected:
     static float neighbourDistanceMetric(Rrt* rrt, const Coord& state);
 
     static bool newState(const Coord& state, Rrt* xNear, float input, Coord* nState, const Coord& goal);
-    static bool noCollision(const Coord& newState);
+    static bool noCollision(const Coord& startState, const Coord& newState);
 
     // publish path
     static void publishPath(Rrt* goalNode);
@@ -46,6 +46,9 @@ private:
     static void mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map);
     static void pathreqCallback(const nav_msgs::PathRequest::ConstPtr& pathreq);
     static nav_msgs::OccupancyGrid::ConstPtr map_;
+
+    static bool isObstacle(const Coord& coord);
+    static bool isObstacle(int gridX, int gridY);
 
     // Publisher
     static ros::Publisher path_pub_;

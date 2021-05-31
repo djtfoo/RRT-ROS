@@ -8,7 +8,7 @@
 #include <nav_msgs/PathRequest.h>
 
 #include "visualizer_window.h"
-#include "msg_visualizer.h"
+#include "msg_handler.h"
 #include "pathrequest/pathrequest_handler.h"
 
 class PathRequestInterface {
@@ -100,7 +100,7 @@ private:
         // store reference to map data
         map_ = map;
         // have a "Map Parser" to create VisualizerWindow and draw out the map
-        MsgVisualizer::parseMap(&window_, map, false);
+        MsgHandler::parseMap(&window_, map, false);
         // set mouse click event callback
         window_->setMouseCallbackFunc(processMouseEvent);
     }

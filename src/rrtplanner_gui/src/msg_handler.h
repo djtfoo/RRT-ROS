@@ -1,5 +1,5 @@
-#ifndef MSG_VISUALIZER_H_
-#define MSG_VISUALIZER_H_
+#ifndef MSG_HANDLER_H_
+#define MSG_HANDLER_H_
 
 #include <map>
 
@@ -10,7 +10,7 @@
 
 #include "visualizer_window.h"
 
-class MsgVisualizer {
+class MsgHandler {
 
     // list of RRT Nodes
     static std::map<int, nav_msgs::RrtNode::ConstPtr> rrtNodes;
@@ -26,4 +26,4 @@ public:
     static void fillGrid(VisualizerWindow* window, int gridX, int gridY, int gridsize, const Scalar& color);
 };
 
-#endif  // MSG_VISUALIZER_H_
+#endif  // MSG_HANDLER_H_

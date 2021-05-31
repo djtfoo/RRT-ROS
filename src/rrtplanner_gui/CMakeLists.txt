@@ -127,7 +127,7 @@ include_directories(
 
 set(visualizer_SRCS
   src/visualizer_window.cpp
-  src/msg_visualizer.cpp
+  src/msg_handler.cpp
 )
 set(pathrequest_SRCS
   src/pathrequest/pathrequest_handler.cpp

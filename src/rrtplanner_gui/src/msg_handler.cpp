@@ -1,10 +1,11 @@
-#include "msg_visualizer.h"
-#include <iostream>  // for testing only
-#include <ros/ros.h>  // for testing only
+#include "msg_handler.h"
 
-std::map<int, nav_msgs::RrtNode::ConstPtr> MsgVisualizer::rrtNodes;
+#include <iostream>
+#include <ros/ros.h>
 
-void MsgVisualizer::parseMap(VisualizerWindow** window, const nav_msgs::OccupancyGrid::ConstPtr& map, bool showGridLines) {
+std::map<int, nav_msgs::RrtNode::ConstPtr> MsgHandler::rrtNodes;
+
+void MsgHandler::parseMap(VisualizerWindow** window, const nav_msgs::OccupancyGrid::ConstPtr& map, bool showGridLines) {
     std::cout << "Parse Map" << std::endl;
     std::cout << map->name << std::endl;
     std::cout << map->width << ", " << map->height << ", " << (int)map->gridsize << "," << std::endl;
@@ -53,7 +54,7 @@ void MsgVisualizer::parseMap(VisualizerWindow** window, const nav_msgs::Occupanc
     }
 }
 
-void MsgVisualizer::fillGrid(VisualizerWindow* window, int gridX, int gridY, int gridsize, const Scalar& color) {
+void MsgHandler::fillGrid(VisualizerWindow* window, int gridX, int gridY, int gridsize, const Scalar& color) {
     // compute min pixel coordinate
     int pixel_x = gridX * gridsize;
     int pixel_y = gridY * gridsize;
@@ -67,7 +68,7 @@ void MsgVisualizer::fillGrid(VisualizerWindow* window, int gridX, int gridY, int
 
 }
 
-void MsgVisualizer::parsePathRequest(VisualizerWindow* window, const nav_msgs::PathRequest::ConstPtr& pathreq) {
+void MsgHandler::parsePathRequest(VisualizerWindow* window, const nav_msgs::PathRequest::ConstPtr& pathreq) {
     // draw start node
     window->drawCircle(
         Point(pathreq->start_x, pathreq->start_y),
@@ -85,7 +86,7 @@ void MsgVisualizer::parsePathRequest(VisualizerWindow* window, const nav_msgs::P
     );
 }
 
-void MsgVisualizer::parseRrtNode(VisualizerWindow* window, const nav_msgs::RrtNode::ConstPtr& rrtNode) {
+void MsgHandler::parseRrtNode(VisualizerWindow* window, const nav_msgs::RrtNode::ConstPtr& rrtNode) {
 
     // check if RRT Node is a root node
     if (rrtNode->parent == -1)  // node has no parent
@@ -108,7 +109,7 @@ void MsgVisualizer::parseRrtNode(VisualizerWindow* window, const nav_msgs::RrtNo
     }
 }
 
-void MsgVisualizer::parsePath(VisualizerWindow* window, const nav_msgs::Path::ConstPtr& path) {
+void MsgHandler::parsePath(VisualizerWindow* window, const nav_msgs::Path::ConstPtr& path) {
 
     // allow map to remain visible for a slightly longer time
     ros::Duration(0.5f).sleep();

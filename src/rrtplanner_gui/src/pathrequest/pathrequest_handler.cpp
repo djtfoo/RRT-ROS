@@ -3,7 +3,7 @@
 #include <opencv2/highgui.hpp>
 
 #include "pathrequest_handler.h"
-#include "../msg_visualizer.h"
+#include "../msg_handler.h"
 
 using namespace cv;
 
@@ -17,14 +17,14 @@ bool PathRequestHandler::isObstacle(const nav_msgs::OccupancyGrid::ConstPtr& map
 }
 
 void PathRequestHandler::clearGrid(VisualizerWindow* window, int gridX, int gridY, int gridsize) {
-    MsgVisualizer::fillGrid(window, gridX, gridY, gridsize, Scalar(0, 0, 0));
+    MsgHandler::fillGrid(window, gridX, gridY, gridsize, Scalar(0, 0, 0));
 }
 
 void PathRequestHandler::fillStartGrid(VisualizerWindow* window, int gridX, int gridY, int gridsize) {
-    MsgVisualizer::fillGrid(window, gridX, gridY, gridsize, Scalar(0, 255, 0));
+    MsgHandler::fillGrid(window, gridX, gridY, gridsize, Scalar(0, 255, 0));
 }
 
 void PathRequestHandler::fillGoalGrid(VisualizerWindow* window, int gridX, int gridY, int gridsize) {
-    MsgVisualizer::fillGrid(window, gridX, gridY, gridsize, Scalar(0, 0, 255));
+    MsgHandler::fillGrid(window, gridX, gridY, gridsize, Scalar(0, 0, 255));
 }
 

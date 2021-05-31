@@ -7,7 +7,7 @@
 #include <nav_msgs/Path.h>
 
 #include "visualizer_window.h"
-#include "msg_visualizer.h"
+#include "msg_handler.h"
 
 class VisualizerInterface {
 public:
@@ -45,26 +45,26 @@ private:
     // Subscriber callback
     static void mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map) {
         // have a "Map Parser" to create VisualizerWindow and draw out the map
-        MsgVisualizer::parseMap(&window_, map, false);
+        MsgHandler::parseMap(&window_, map, false);
     }
     static void pathreqCallback(const nav_msgs::PathRequest::ConstPtr& pathreq) {
         // have a "Path Request Parser" to draw start and goal nodes on VisualizerWindow
         if (window_ != nullptr)
-            MsgVisualizer::parsePathRequest(window_, pathreq);
+            MsgHandler::parsePathRequest(window_, pathreq);
         else
             ROS_INFO("Received message from /pathreq, but no window is currently open.");
     }
     static void rrtnodeCallback(const nav_msgs::RrtNode::ConstPtr& rrtNode) {
         // have a "RrtNode Parser" to draw RRT nodes and edges on VisualizerWindow
         if (window_ != nullptr)
-            MsgVisualizer::parseRrtNode(window_, rrtNode);
+            MsgHandler::parseRrtNode(window_, rrtNode);
         else
             ROS_INFO("Received message from /rrtnode, but no window is currently open.");
     }
     static void pathCallback(const nav_msgs::Path::ConstPtr& path) {
         // have a "Path Parser" to draw Path on VisualizerWindow
         if (window_ != nullptr)
-            MsgVisualizer::parsePath(window_, path);
+            MsgHandler::parsePath(window_, path);
         else
             ROS_INFO("Received message from /path, but no window is currently open.");
     }

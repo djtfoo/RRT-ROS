@@ -6,7 +6,7 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include "lodepng/lodepng.h"
 
-#include <iostream>  // for logging
+#include <iostream>  // for printing msg
 #include <sstream>
 
 class MapParser {
@@ -92,7 +92,7 @@ private:
 int main(int argc, char* argv[]) {
     // check args first
     if (argc < 2) {
-        ROS_INFO("Missing arguments");
+        ROS_INFO("Missing arguments");  // TODO: provide some info and instructions
         return 0;
     }
 	

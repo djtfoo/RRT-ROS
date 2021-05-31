@@ -2,6 +2,7 @@
 #include <thread>
 
 #include <nav_msgs/OccupancyGrid.h>
+#include <nav_msgs/PathRequest.h>
 #include <nav_msgs/RrtNode.h>
 #include <nav_msgs/Path.h>
 
@@ -12,6 +13,7 @@ class VisualizerInterface {
 public:
     VisualizerInterface(ros::NodeHandle& nh)
     {
+        // Subscribe to ROS topics
         map_sub_ = nh.subscribe("map", 1, mapCallback);
         pathreq_sub_ = nh.subscribe("pathreq", 1, pathreqCallback);
         rrt_sub_ = nh.subscribe("rrtnode", 1, rrtnodeCallback);

@@ -13,13 +13,6 @@ int main(int argc, char* argv[]) {
 
     // TODO: use argv to enable/disable visualization
 
-    // Get start and end positions
-    //Coord start(0, 0);
-    //Coord end(450, 450);
-
-    // Plan path
-    //rrtPlanner.planPath(start, end);  // TODO: planPath should be a subscriber callback instead
-
     // Don't exit the program
     ros::spin();
 }

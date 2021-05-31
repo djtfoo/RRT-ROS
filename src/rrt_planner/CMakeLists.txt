@@ -148,6 +148,7 @@ set(mapserver_SRCS
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(planner_node ${rrt_planner_SRCS} src/planner_node.cpp)
 add_executable(mapserver_node ${mapserver_SRCS} src/mapserver_node.cpp)
+add_executable(pathrequest_node src/pathrequest_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -166,10 +167,13 @@ add_executable(mapserver_node ${mapserver_SRCS} src/mapserver_node.cpp)
  target_link_libraries(mapserver_node
    ${catkin_LIBRARIES}
  )
+ target_link_libraries(pathrequest_node
+   ${catkin_LIBRARIES}
+ )
 
 add_dependencies(planner_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
 add_dependencies(mapserver_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(pathrequest_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##

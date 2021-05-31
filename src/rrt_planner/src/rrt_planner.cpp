@@ -15,6 +15,7 @@ nav_msgs::OccupancyGrid::ConstPtr RrtPlanner::map_ = nullptr;
 float RrtPlanner::_incrementalStep = 4.f;
 
 ros::Subscriber RrtPlanner::map_sub_;
+ros::Subscriber RrtPlanner::pathreq_sub_;
 ros::Publisher RrtPlanner::path_pub_;
 ros::Publisher RrtPlanner::rrt_pub_;
 
@@ -25,7 +26,7 @@ std::vector<int> RrtPlanner::unpopulatedRegions;
 RrtPlanner::RrtPlanner(ros::NodeHandle& nh) {
     // subscribe to ROS topics
     map_sub_ = nh.subscribe<nav_msgs::OccupancyGrid>("map", 1, mapCallback);
-    // TODO: subscribe to start/goal position topic
+    pathreq_sub_ = nh.subscribe<nav_msgs::PathRequest>("pathreq", 1, pathreqCallback);
 
     // advertise ROS topics
     path_pub_ = nh.advertise<nav_msgs::Path>("path", 1);
@@ -79,15 +80,23 @@ void RrtPlanner::publishPath(Rrt* goalNode) {
 
 // Subscriber callback
 void RrtPlanner::mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map) {
-    ROS_INFO("Map callback");
+    ROS_INFO("Map message received");
+
+    // Save map
     map_ = map;
+}
+
+void RrtPlanner::pathreqCallback(const nav_msgs::PathRequest::ConstPtr& pathreq) {
+    ROS_INFO("Path Request message received");
 
     // Set start and end positions
-    Coord start(20, 20);
-    Coord end(50, 480);
+    Coord start(pathreq->start_x, pathreq->start_y);
+    Coord end(pathreq->goal_x, pathreq->goal_y);
+
+    // TODO: Validate start and end coordinates first (command line publisher did not validate them)
 
     // Plan path
-    planPath(start, end);  // TODO: planPath should be a subscriber callback instead
+    planPath(start, end);
 }
 
 // Path planner algorithm (RRT)
@@ -157,8 +166,7 @@ Rrt* RrtPlanner::buildRrt(Rrt* rrt, int iters, const Coord& goal) {
         char status = extend(rrt, xRand, &xNew, goal);
         if (status != STATUS_TRAPPED) {  // node was created successfully
             xNew->setId(i);  // set node id
-            // TODO: publish only if visualization is true
-            // publish new node to ROS topic
+            // publish new node to ROS topic (for visualization)
             publishRrtNode(xNew);
 
             // update RRT state for sampling

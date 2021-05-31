@@ -91,12 +91,32 @@ void RrtPlanner::pathreqCallback(const nav_msgs::PathRequest::ConstPtr& pathreq)
 
     // Set start and end positions
     Coord start(pathreq->start_x, pathreq->start_y);
-    Coord end(pathreq->goal_x, pathreq->goal_y);
+    Coord goal(pathreq->goal_x, pathreq->goal_y);
 
-    // TODO: Validate start and end coordinates first (command line publisher did not validate them)
+    // Validate start and end coordinates first (command line publisher did not validate them)
+    int gridWidth = map_->width / map_->gridsize;
+    bool isValid = true;
+
+    int startX = start._x / map_->gridsize;
+    int startY = start._y / map_->gridsize;
+    if (map_->occupancy[startX*gridWidth + startY]) {
+        ROS_INFO("Start position is in an obstacle");
+        isValid = false;
+    }
+    int goalX = goal._x / map_->gridsize;
+    int goalY = goal._y / map_->gridsize;
+    if (map_->occupancy[goalX*gridWidth + goalY]) {
+        ROS_INFO("Goal position is in an obstacle");
+        isValid = false;
+    }
 
     // Plan path
-    planPath(start, end);
+    if (isValid) {
+        ROS_INFO("Starting RRT.");
+        planPath(start, goal);
+    }
+    else
+        ROS_INFO("Not starting RRT as start/goal position is invalid.");
 }
 
 // Path planner algorithm (RRT)
@@ -122,8 +142,12 @@ void RrtPlanner::planPath(const Coord& start, const Coord& goal) {
     // compute RRT
     Rrt* goalNode = buildRrt(&node, 10000, goal);
     if (goalNode != nullptr) {  // managed to reach the goal
+        ROS_INFO("A path has been found.");
         // publish the path
         publishPath(goalNode);
+    }
+    else {
+        ROS_INFO("No path from start to goal position found.");
     }
 }
 
@@ -331,17 +355,27 @@ bool RrtPlanner::newState(const Coord& state, Rrt* xNear, float input, Coord* nS
     double magnitude = sqrt(vecX*vecX + vecY*vecY);
     if (magnitude < 0.01f)  // sampled the same point as current state
         return false;
-    else if (magnitude >= input) {
-        vecX = (vecX / magnitude) * input;
-        vecY = (vecY / magnitude) * input;
+
+    // unit vector
+    float unitVecX = vecX / magnitude;
+    float unitVecY = vecY / magnitude;
+
+    // if distance to xNear is too far, only move towards it by input
+    if (magnitude >= input) {
+        vecX = unitVecX * input;
+        vecY = unitVecY * input;
     }
 
     // instead of clamping points within map boundary, do a collision check
     nState->_x = xNear->getCoord()->_x + vecX;
     nState->_y = xNear->getCoord()->_y + vecY;
 
-    // check if new state is valid, i.e. no collision detected
-    return noCollision(*nState);
+    // also check more points along line, e.g. midpoint
+    Coord midpoint(xNear->getCoord()->_x + unitVecX * 0.5*magnitude,
+        xNear->getCoord()->_x + unitVecX * 0.5*magnitude);
+
+    // check if new state is valid, i.e. input to new state does not intersect with obstacle
+    return noCollision(*nState) && noCollision(midpoint);
 }
 
 bool RrtPlanner::noCollision(const Coord& newState) {
@@ -351,12 +385,14 @@ bool RrtPlanner::noCollision(const Coord& newState) {
         newState._y < 0 || newState._y >= map_->height)
         return false;
 
-    // check if the straight line from state to newState intersects with an obstacle grid
+    // check if the newState is an obstacle grid
     int gridX = newState._x / map_->gridsize;
     int gridY = newState._y / map_->gridsize;
     int gridWidth = map_->width / map_->gridsize;
     if (map_->occupancy[gridY*gridWidth + gridX])
         return false;
+
+    // check Manhattan distance
 
     // else, no collision
     return true;

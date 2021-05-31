@@ -1,12 +1,18 @@
 #include "visualizer_window.h"
+#include "gui/button.h"
 
 VisualizerWindow::VisualizerWindow(const char* name, int w, int h) :
  _windowName((char*)name), _width(w), _height(h), _callback(NULL)
 {
     // Create base Mat img
-    _img = Mat::zeros(w, h, CV_8UC3);
-}
+    _img = Mat::zeros(h+_bottomBarHeight, w, CV_8UC3);
 
+    // Create bottom bar
+    drawRectangle(Point(0, h), Point(w, h+_bottomBarHeight), Scalar(100, 100, 100), -1);
+
+    // Draw Buttons
+    Button::drawButtons(w, h+_bottomBarHeight, this);
+}
 
 void VisualizerWindow::setMouseCallbackFunc(MouseCallback callback) {
     _callback = callback;
@@ -23,6 +29,7 @@ void VisualizerWindow::displayWindow() {
     waitKey(5);
 }
 
+/* Drawer functions */
 void VisualizerWindow::drawCircle(const Point& center, int radius, const Scalar& color, int thickness) {
     circle(_img,
         center,
@@ -51,5 +58,16 @@ void VisualizerWindow::drawLine(const Point& start, const Point& end, const Scal
         color,
         thickness,
         LINE_8
+    );
+}
+
+void VisualizerWindow::putText(const char* text, const Point& topleftPos, float fontSize, const Scalar& color, int thickness) {
+    cv::putText(_img,
+        text,
+        Point(topleftPos.x, topleftPos.y),
+        FONT_HERSHEY_DUPLEX,
+        fontSize,
+        color,
+        thickness
     );
 }

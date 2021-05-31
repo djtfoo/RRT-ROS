@@ -11,7 +11,11 @@ bool PathRequestHandler::isObstacle(const nav_msgs::OccupancyGrid::ConstPtr& map
     int idx = gridY * (map->width/map->gridsize) + gridX;
 
     // check if grid is obstacle
-    return map->occupancy[idx];
+    if (map->occupancy[idx])  // is obstacle
+        return true;
+
+    // also do a bounds check
+    return (gridX < 0 || gridX >= (map->width / map->gridsize) || gridY < 0 || gridY >= (map->height / map->gridsize));
 }
 
 void PathRequestHandler::clearGrid(VisualizerWindow* window, int gridX, int gridY, int gridsize) {

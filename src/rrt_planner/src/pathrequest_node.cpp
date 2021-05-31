@@ -18,6 +18,8 @@ int main(int argc, char* argv[]) {
     // Advertise for /pathreq topic
     ros::Publisher pathreq_pub = nh.advertise<nav_msgs::PathRequest>("pathreq", 1);
 
+    ROS_INFO("Path Request node started");
+
     // Create message
     nav_msgs::PathRequest pathReq;
 
@@ -46,10 +48,12 @@ int main(int argc, char* argv[]) {
     unsigned int gs;  // grid size
     ss >> gs;
 
+    // Publish to topic
+    pathreq_pub.publish(pathReq);
+
+    ROS_INFO("Published to /pathreq");
+
     // Print out
     std::cout << "Start: (" << pathReq.start_x << ", " << pathReq.start_y << ")" << std::endl;
     std::cout << "Goal: (" << pathReq.goal_x << ", " << pathReq.goal_y << ")" << std::endl;
-
-    // Publish to topic
-    pathreq_pub.publish(pathReq);
 }

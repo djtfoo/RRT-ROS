@@ -11,6 +11,8 @@
 #include "msg_handler.h"
 #include "pathrequest/pathrequest_handler.h"
 
+#include "gui/button.h"
+
 class VisualizerInterface {
 public:
     VisualizerInterface(ros::NodeHandle& nh)
@@ -23,6 +25,9 @@ public:
 
         // Advertise ROS topics
         pathreq_pub_ = nh.advertise<nav_msgs::PathRequest>("pathreq", 1);
+
+        // add Button
+        Button::createButton(Anchor(BottomLeft, 50, 5), 100, 30, 180, 180, 180, "Plan Path", (void*)publishPathRequest);
     }
     ~VisualizerInterface() {
         if (window_ != nullptr)
@@ -57,9 +62,12 @@ private:
         window_->setMouseCallbackFunc(processMouseEvent);
     }
     static void pathreqCallback(const nav_msgs::PathRequest::ConstPtr& pathreq) {
-        // have a "Path Request Parser" to draw start and goal nodes on VisualizerWindow
-        if (window_ != nullptr)
+        if (window_ != nullptr) {
+            // clear start and goal nodes
+            cleanStartGoalPos();
+            // have a "Path Request Parser" to draw start and goal nodes on VisualizerWindow
             MsgHandler::parsePathRequest(window_, pathreq);
+        }
         else
             ROS_INFO("Received message from /pathreq, but no window is currently open.");
     }
@@ -82,7 +90,23 @@ private:
     static nav_msgs::OccupancyGrid::ConstPtr map_;
 
     // Publisher
-    ros::Publisher pathreq_pub_;  // publisher for /pathreq topic
+    static ros::Publisher pathreq_pub_;  // publisher for /pathreq topic
+    static void publishPathRequest() {
+        if (startX_ == -1 || startY_ == -1 || goalX_ == -1 || goalY_ == -1) {
+            ROS_INFO("Both start and goal position must be set to publish PathRequest.");
+            return;
+        }
+        // Create message
+        nav_msgs::PathRequest pathreq;
+        pathreq.start_x = (startX_ + 0.5f) * map_->gridsize;
+        pathreq.start_y = (startY_ + 0.5f) * map_->gridsize;
+        pathreq.goal_x = (goalX_ + 0.5f) * map_->gridsize;
+        pathreq.goal_y = (goalY_ + 0.5f) * map_->gridsize;
+
+        // Publish message
+        pathreq_pub_.publish(pathreq);
+        ROS_INFO("Published to /pathreq successfully.");
+    }
 
     // Publisher message data
     static int startX_;
@@ -90,11 +114,27 @@ private:
     static int goalX_;
     static int goalY_;
 
+    static void cleanStartGoalPos() {
+        if (startX_ != -1 && startY_ != -1) {
+            PathRequestHandler::clearGrid(window_, startX_, startY_, map_->gridsize);
+            // reset
+            startX_ = -1;
+            startY_ = -1;
+        }
+        if (goalX_ != -1 && goalY_ != -1) {
+            PathRequestHandler::clearGrid(window_, goalX_, goalY_, map_->gridsize);
+            // reset
+            goalX_ = -1;
+            goalY_ = -1;
+        }
+    }
+
     // Mouse Event Callback
     static void processMouseEvent(int event, int mouseX, int mouseY, int flags, void* param) {
 
         // Set start grid
         if (event == EVENT_LBUTTONDOWN) {  // left mouse click
+            ROS_INFO("Left Mouse Click");
             // get grid coordinate
             int grid_x = mouseX / map_->gridsize;
             int grid_y = mouseY / map_->gridsize;
@@ -114,9 +154,14 @@ private:
                 // draw fill for selected grid
                 PathRequestHandler::fillStartGrid(window_, grid_x, grid_y, map_->gridsize);
             }
+            // check button click events
+            else {
+                Button::processButtonClick(mouseX, mouseY);
+            }
         }
         // Set goal grid
         else if (event == EVENT_RBUTTONDOWN) {  // right mouse click
+            ROS_INFO("Right Mouse Click");
             // get grid coordinate
             int grid_x = mouseX / map_->gridsize;
             int grid_y = mouseY / map_->gridsize;
@@ -142,6 +187,8 @@ private:
 
 VisualizerWindow* VisualizerInterface::window_ = nullptr;
 nav_msgs::OccupancyGrid::ConstPtr VisualizerInterface::map_ = nullptr;
+ros::Publisher VisualizerInterface::pathreq_pub_;
+
 int VisualizerInterface::startX_ = -1;
 int VisualizerInterface::startY_ = -1;
 int VisualizerInterface::goalX_ = -1;

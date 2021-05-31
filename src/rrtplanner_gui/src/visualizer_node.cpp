@@ -5,9 +5,11 @@
 #include <nav_msgs/PathRequest.h>
 #include <nav_msgs/RrtNode.h>
 #include <nav_msgs/Path.h>
+#include <nav_msgs/PathRequest.h>
 
 #include "visualizer_window.h"
 #include "msg_handler.h"
+#include "pathrequest/pathrequest_handler.h"
 
 class VisualizerInterface {
 public:
@@ -18,6 +20,9 @@ public:
         pathreq_sub_ = nh.subscribe("pathreq", 1, pathreqCallback);
         rrt_sub_ = nh.subscribe("rrtnode", 1, rrtnodeCallback);
         path_sub_ = nh.subscribe("path", 1, pathCallback);
+
+        // Advertise ROS topics
+        pathreq_pub_ = nh.advertise<nav_msgs::PathRequest>("pathreq", 1);
     }
     ~VisualizerInterface() {
         if (window_ != nullptr)
@@ -44,8 +49,12 @@ private:
 
     // Subscriber callback
     static void mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map) {
+        // store reference to map data
+        map_ = map;
         // have a "Map Parser" to create VisualizerWindow and draw out the map
         MsgHandler::parseMap(&window_, map, false);
+        // set mouse click event callback
+        window_->setMouseCallbackFunc(processMouseEvent);
     }
     static void pathreqCallback(const nav_msgs::PathRequest::ConstPtr& pathreq) {
         // have a "Path Request Parser" to draw start and goal nodes on VisualizerWindow
@@ -68,9 +77,75 @@ private:
         else
             ROS_INFO("Received message from /path, but no window is currently open.");
     }
+
+    // Subscriber messages
+    static nav_msgs::OccupancyGrid::ConstPtr map_;
+
+    // Publisher
+    ros::Publisher pathreq_pub_;  // publisher for /pathreq topic
+
+    // Publisher message data
+    static int startX_;
+    static int startY_;
+    static int goalX_;
+    static int goalY_;
+
+    // Mouse Event Callback
+    static void processMouseEvent(int event, int mouseX, int mouseY, int flags, void* param) {
+
+        // Set start grid
+        if (event == EVENT_LBUTTONDOWN) {  // left mouse click
+            // get grid coordinate
+            int grid_x = mouseX / map_->gridsize;
+            int grid_y = mouseY / map_->gridsize;
+
+            // check if grid is valid
+            if (!PathRequestHandler::isObstacle(map_, grid_x, grid_y) &&  // selected grid is not an obstacle
+                (grid_x != goalX_ && grid_y != goalY_))  // does not overlap with goal grid
+            {
+                // clear fill of previous grid
+                if (startX_ != -1 && startY_ != -1)
+                    PathRequestHandler::clearGrid(window_, startX_, startY_, map_->gridsize);
+
+                // save start grid coordinates
+                startX_ = grid_x;
+                startY_ = grid_y;
+
+                // draw fill for selected grid
+                PathRequestHandler::fillStartGrid(window_, grid_x, grid_y, map_->gridsize);
+            }
+        }
+        // Set goal grid
+        else if (event == EVENT_RBUTTONDOWN) {  // right mouse click
+            // get grid coordinate
+            int grid_x = mouseX / map_->gridsize;
+            int grid_y = mouseY / map_->gridsize;
+
+            // check if grid is valid
+            if (!PathRequestHandler::isObstacle(map_, grid_x, grid_y) &&  // selected grid is not an obstacle
+                (grid_x != startX_ && grid_y != startY_))  // does not overlap with start grid
+            {
+                // clear fill of previous grid
+                if (goalX_ != -1 && goalY_ != -1)
+                    PathRequestHandler::clearGrid(window_, goalX_, goalY_, map_->gridsize);
+
+                // save start grid coordinates
+                goalX_ = grid_x;
+                goalY_ = grid_y;
+
+                // draw fill for selected grid
+                PathRequestHandler::fillGoalGrid(window_, grid_x, grid_y, map_->gridsize);
+            }
+        }
+    }
 };
 
 VisualizerWindow* VisualizerInterface::window_ = nullptr;
+nav_msgs::OccupancyGrid::ConstPtr VisualizerInterface::map_ = nullptr;
+int VisualizerInterface::startX_ = -1;
+int VisualizerInterface::startY_ = -1;
+int VisualizerInterface::goalX_ = -1;
+int VisualizerInterface::goalY_ = -1;
 
 int main(int argc, char* argv[]) {
     // ROS init

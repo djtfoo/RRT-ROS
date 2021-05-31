@@ -6,8 +6,10 @@
 
 class PathRequestHandler {
 public:
+    // Initialization
     void init();
 
+    // Map obstacle checker
     static bool isObstacle(const nav_msgs::OccupancyGrid::ConstPtr& map, int gridX, int gridY);
 
     // grid fill helper functions

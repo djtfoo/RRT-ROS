@@ -1,6 +1,4 @@
-#include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
-#include <opencv2/highgui.hpp>
 
 #include "pathrequest_handler.h"
 #include "../msg_handler.h"

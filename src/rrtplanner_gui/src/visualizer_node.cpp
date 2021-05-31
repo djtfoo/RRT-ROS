@@ -64,7 +64,11 @@ private:
     static void pathreqCallback(const nav_msgs::PathRequest::ConstPtr& pathreq) {
         if (window_ != nullptr) {
             // clear start and goal nodes
-            cleanStartGoalPos();
+            //cleanStartGoalPos();
+            // clear everything by drawing out the map again from scratch
+            MsgHandler::parseMap(&window_, map_, false);
+            // set mouse click event callback
+            window_->setMouseCallbackFunc(processMouseEvent);
             // have a "Path Request Parser" to draw start and goal nodes on VisualizerWindow
             MsgHandler::parsePathRequest(window_, pathreq);
         }
@@ -106,6 +110,9 @@ private:
         // Publish message
         pathreq_pub_.publish(pathreq);
         ROS_INFO("Published to /pathreq successfully.");
+
+        // clear
+        startX_ = startY_ = goalX_ = goalY_ = -1;
     }
 
     // Publisher message data

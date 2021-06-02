@@ -86,7 +86,7 @@ void MsgHandler::parsePathRequest(VisualizerWindow* window, const nav_msgs::Path
     window->drawCircle(
         Point(pathreq->start_x, pathreq->start_y),
         3,
-        Scalar(255, 255, 0),
+        Scalar(255, 150, 0),
         -1   // FILLED
     );
 
@@ -95,7 +95,7 @@ void MsgHandler::parsePathRequest(VisualizerWindow* window, const nav_msgs::Path
     window->drawCircle(
         Point(pathreq->goal_x, pathreq->goal_y),
         2,
-        Scalar(255, 255, 0),
+        Scalar(255, 150, 0),
         -1   // FILLED
     );
 }
@@ -132,7 +132,7 @@ void MsgHandler::parseRrtNode(VisualizerWindow* window, const nav_msgs::RrtNode:
                 window->drawLine(
                     Point(parent->x, parent->y),
                     Point(node->x, node->y),
-                    Scalar(255, 255, 0),
+                    Scalar(255, 150, 0),
                     1
                 );
             }
@@ -142,7 +142,7 @@ void MsgHandler::parseRrtNode(VisualizerWindow* window, const nav_msgs::RrtNode:
     }
     rrtNodes[rrtNode->id] = rrtNode;  // add updated rrtNode to map
 
-    // draw edge from rrtNode to parent
+    // draw new edge from rrtNode to parent
     if (rrtNode->parent != -1) {
     //std::cout << "Draw" << std::endl;
         //std::cout << "Trying to draw ..." << std::endl;
@@ -151,7 +151,7 @@ void MsgHandler::parseRrtNode(VisualizerWindow* window, const nav_msgs::RrtNode:
         window->drawLine(
             Point(parent->x, parent->y),
             Point(rrtNode->x, rrtNode->y),
-            Scalar(255, 255, 0),
+            Scalar(255, 150, 0),
             1
          );
     //std::cout << "Drawn" << std::endl;
@@ -180,7 +180,7 @@ void MsgHandler::parsePath(VisualizerWindow* window, const nav_msgs::Path::Const
         window->drawLine(
             Point(parent->x, parent->y),
             Point(thisNode->x, thisNode->y),
-            Scalar(255, 255, 0),  // dark blue
+            Scalar(255, 0, 255),  // magenta
             2
          );
     }
@@ -197,7 +197,7 @@ void MsgHandler::parsePath(VisualizerWindow* window, const nav_msgs::Path::Const
     // draw goal node
     window->drawCircle(
         Point(path->path[0].x, path->path[0].y),
-        3,
+        4,
         Scalar(0, 0, 255),  // red
         -1   // FILLED
     );

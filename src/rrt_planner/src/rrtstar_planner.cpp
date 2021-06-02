@@ -20,7 +20,8 @@ void RrtStarPlanner::addAndOptimiseNodes(Rrt* rrt, Rrt* xNew) {
         return;
     }
 
-    // remove parent first
+    // TODO: remove parent first, but currently buggy
+    xNew->getParent()->removeChild(xNew);
     xNew->setParent(nullptr);
 
     // compute distances between xNew and nearby nodes (will be used in the following steps)
@@ -30,16 +31,18 @@ void RrtStarPlanner::addAndOptimiseNodes(Rrt* rrt, Rrt* xNew) {
     }
 
     // find optimal path from root to xNew
-    float shortestPath = computePathLength(nearbyNodes[0]) + distances[0];
-    int nodeIdx = 0;
+    float shortestPath = neighbourhoodRadius*neighbourhoodRadius + 1.f;
+    int nodeIdx = -1;
     std::cout << "Leggo" << std::endl;
-    for (int i = 1; i < nearbyNodes.size(); ++i) {
-        float pathLength = computePathLength(nearbyNodes[i]);
-        pathLength += distances[i];
+    for (int i = 0; i < nearbyNodes.size(); ++i) {
+        float pathLength = computePathLength(nearbyNodes[i]) + distances[i];
         // check if it is new shortest path length
-        if (pathLength < shortestPath) {
-            shortestPath = pathLength;
-            nodeIdx = i;
+        if (nodeIdx == -1 || pathLength < shortestPath) {
+            // check if path is valid
+            if (checkNoCollision(nearbyNodes[i], xNew, distances[i])) {
+                shortestPath = pathLength;
+                nodeIdx = i;
+            }
         }
     }
     // add xNew to nearbyNode with the shortest path length
@@ -54,7 +57,7 @@ void RrtStarPlanner::addAndOptimiseNodes(Rrt* rrt, Rrt* xNew) {
     std::cout << "Rewire step" << std::endl;
     // check all nearby nodes if their path can be optimised with xNew
     // (check if (path of root to nearby node) < (path of root to xNew + xNew to nearby node))
-    for (int i = 1; i < nearbyNodes.size(); ++i) {
+    for (int i = 0; i < nearbyNodes.size(); ++i) {
         // skip checking xNew's parent
         /// (by right, can skip all of the nodes on the path from root to xNew)
         if (i == nodeIdx) {  // xNew's parent node
@@ -63,33 +66,53 @@ void RrtStarPlanner::addAndOptimiseNodes(Rrt* rrt, Rrt* xNew) {
 
         // compute length of path from root to node to be checked (i.e. nearby node)
         float pathLength = computePathLength(nearbyNodes[i]);
-        if (shortestPath + distances[i] < pathLength) {  // a shorter path is found
+        if (shortestPath + distances[i] + 1.f < pathLength) {  // a shorter path is found
             // rewire only if it does not pass through obstacles
-            // get vector
-            float vecX = xNew->getCoord()->_x - nearbyNodes[i]->getCoord()->_x;
-            float vecY = xNew->getCoord()->_y - nearbyNodes[i]->getCoord()->_y ;
-            // find unit vector
-            float unitVecX = vecX / distances[i];
-            float unitVecY = vecY / distances[i];
-            bool rewire = true;
-            for (float dist = 0; dist < distances[i]; dist += 0.5f*_incrementalStep) {
-                // check there is an obstacle at every incremental step
-                Coord point(nearbyNodes[i]->getCoord()->_x + unitVecX * dist, nearbyNodes[i]->getCoord()->_y + unitVecY * dist);
-
-                if (!noCollision(*(nearbyNodes[i]->getCoord()), point)) {
-                    rewire = false;
-                    break;
-                }
-            }
-            // rewire nearby node if no obstacles
-            if (rewire) {
-                // rewire by setting new parent
-                nearbyNodes[i]->setParent(xNew);
-                // publish changed node
-                publishRrtNode(nearbyNodes[i]);
-            }
+            tryRewireNodes(nearbyNodes[i], xNew, distances[i]);
         }
     }
+}
+
+
+void RrtStarPlanner::tryRewireNodes(Rrt* nearbyNode, Rrt* xNew, float distance) {
+
+    // check if can rewire nearby node
+    if (checkNoCollision(nearbyNode, xNew, distance)) {  // if no obstacles
+        // TODO: remove nearby node from parent, but currently buggy
+        nearbyNode->getParent()->removeChild(nearbyNode);
+        // rewire by setting new parent
+        nearbyNode->setParent(xNew);
+        xNew->addChild(nearbyNode);
+        // publish changed node
+        publishRrtNode(nearbyNode);
+    }
+}
+
+
+bool RrtStarPlanner::checkNoCollision(Rrt* node, Rrt* other, float distance) {
+
+    Coord pt1(node->getCoord()->_x, node->getCoord()->_y), pt2;
+    // get vector
+    float vecX = other->getCoord()->_x - pt1._x;
+    float vecY = other->getCoord()->_y - pt1._y;
+    // find unit vector
+    float unitVecX = vecX / distance;
+    float unitVecY = vecY / distance;
+
+    for (float dist = 0; dist < distance; dist += _incrementalStep) {
+        // check there is an obstacle at every incremental step
+        pt2._x = node->getCoord()->_x + unitVecX * dist;
+        pt2._y = node->getCoord()->_y + unitVecY * dist;
+
+        if (!noCollision(pt1, pt2)) {  // there was collision
+            return false;
+        }
+
+        // advance to next point
+        pt1._x = pt2._x;
+        pt1._y = pt2._y;
+    }
+    return true;
 }
 
 

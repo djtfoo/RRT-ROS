@@ -93,7 +93,7 @@ void RrtPlanner::planPath(nav_msgs::OccupancyGrid::ConstPtr map, const Coord& st
     ROS_INFO("Build RRT.");
 
     // compute RRT
-    Rrt* goalNode = buildRrt(&node, 10000, goal);
+    Rrt* goalNode = buildRrt(&node, 4000, goal);
     if (goalNode != nullptr) {  // managed to reach the goal
         ROS_INFO("A path has been found.");
         // publish the path
@@ -324,8 +324,7 @@ bool RrtPlanner::newState(const Coord& state, Rrt* xNear, float input, Coord* nS
 bool RrtPlanner::isObstacle(const Coord& coord) {
     int gridX = coord._x / map_->gridsize;
     int gridY = coord._y / map_->gridsize;
-    int gridWidth = map_->width / map_->gridsize;
-    return map_->occupancy[gridY*gridWidth + gridX];
+    return isObstacle(gridX, gridY);
 }
 
 bool RrtPlanner::isObstacle(int gridX, int gridY) {

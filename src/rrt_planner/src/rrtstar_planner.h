@@ -16,6 +16,8 @@ protected:
 private:
     void addAndOptimiseNodes(Rrt* rrt, Rrt* xNew);
     void getNearbyNodes(Rrt* rrt, Rrt* xNew, float radius, std::vector<Rrt*>& nearbyNodes);
+    void tryRewireNodes(Rrt* nearbyNode, Rrt* xNew, float distance);
+    bool checkNoCollision(Rrt* node, Rrt* other, float distance);
     float computePathLength(Rrt* node);
 };
 

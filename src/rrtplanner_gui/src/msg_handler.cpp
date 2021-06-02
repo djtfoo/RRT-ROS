@@ -101,10 +101,10 @@ void MsgHandler::parseRrtNode(VisualizerWindow* window, const nav_msgs::RrtNode:
     std::map<int, nav_msgs::RrtNode::ConstPtr>::iterator it;
     it = rrtNodes.find(rrtNode->id);
     if (it != rrtNodes.end()) {  // rrtNode already in map
-        // erase existing path
-        if (rrtNode->parent != -1) {
+        // erase existing path -- TODO: clean up the map properly, as pixels are getting deleted
+        /*if (rrtNode->parent != -1) {
     //std::cout << "Erase" << std::endl;
-            nav_msgs::RrtNode::ConstPtr parent = rrtNodes[rrtNode->parent];
+            nav_msgs::RrtNode::ConstPtr parent = rrtNodes[it->second->parent];
             window->drawLine(
                 Point(parent->x, parent->y),
                 Point(rrtNode->x, rrtNode->y),
@@ -112,7 +112,7 @@ void MsgHandler::parseRrtNode(VisualizerWindow* window, const nav_msgs::RrtNode:
                 1
             );
     //std::cout << "Erased" << std::endl;
-        }
+        }*/
     }
     rrtNodes[rrtNode->id] = rrtNode;  // add rrtNode to map
 

@@ -59,6 +59,16 @@ public:
     void addChild(Rrt* child) {
         _children.push_back(child);
     }
+    bool removeChild(Rrt* target) {
+        int targetId = target->getId();
+        for (int i = 0; i < _children.size(); ++i) {
+            if (_children.at(i)->getId() == targetId) {
+                _children.erase(_children.begin()+i);
+                return true;
+            }
+        }
+        return false;
+    }
 
     // helper functions
     bool equalsState(const Coord& state) {

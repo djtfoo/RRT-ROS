@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(rrtplanner_gui)
+project(rrtplanner_map)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -108,7 +108,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES rrtplanner_gui
+#  LIBRARIES rrtplanner_map
   CATKIN_DEPENDS roscpp #vision_opencv
 #  DEPENDS system_lib
 )
@@ -139,7 +139,7 @@ set(map_SRCS
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/rrtplanner_gui.cpp
+#   src/${PROJECT_NAME}/rrtplanner_map.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -150,7 +150,7 @@ set(map_SRCS
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/rrtplanner_gui_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/rrtplanner_map_node.cpp)
 add_executable(visualizer_node ${gui_SRCS} ${pathrequest_SRCS} src/visualizer_node.cpp)
 add_executable(mapserver_node ${map_SRCS} src/mapserver_node.cpp)
 add_executable(mapdrawer_node ${gui_SRCS} ${map_SRCS} src/mapdrawer_node.cpp)
@@ -230,7 +230,7 @@ add_dependencies(mapdrawer_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTE
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_rrtplanner_gui.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_rrtplanner_map.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

@@ -7,7 +7,11 @@
 int main(int argc, char* argv[]) {
     // check args first
     if (argc <= 5) {
-        std::cout << "Missing arguments" << std::endl;  // TODO: provide some info and instructions
+        std::cout << "Missing arguments; try running:" << std::endl;
+        // provide info and instructions
+        std::cout << "rosrun rrt_planner pathrequest_node <start_x> <start_y> <goal_x> <goal_y> <rrt_ver>" << std::endl;
+        std::cout << " - [start/goal]_[xy]: pixel coordinates" << std::endl;
+        std::cout << " - rrt_ver: 0 for basic RRT, 1 for RRT*" << std::endl;
         return 0;
     }
 

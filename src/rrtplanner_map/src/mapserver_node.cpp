@@ -60,7 +60,10 @@ private:
 int main(int argc, char* argv[]) {
     // check args first
     if (argc <= 2) {
-        ROS_INFO("Missing arguments");  // TODO: provide some info and instructions
+        std::cout << "Missing arguments; try running:" << std::endl;
+        // provide info and instructions
+        std::cout << "rosrun rrtplanner_map mapserver_node <path_to_map_image> <gridsize>" << std::endl;
+        std::cout << " - gridsize: pixel coordinates" << std::endl;
         return 0;
     }
 	

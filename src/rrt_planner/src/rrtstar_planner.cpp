@@ -99,7 +99,7 @@ bool RrtStarPlanner::checkNoCollision(Rrt* node, Rrt* other, float distance) {
     float unitVecX = vecX / distance;
     float unitVecY = vecY / distance;
 
-    for (float dist = 0; dist < distance; dist += _incrementalStep) {
+    for (float dist = 0; dist < distance; dist += 0.5f*_incrementalStep) {
         // check there is an obstacle at every incremental step
         pt2._x = node->getCoord()->_x + unitVecX * dist;
         pt2._y = node->getCoord()->_y + unitVecY * dist;

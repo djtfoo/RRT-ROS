@@ -123,7 +123,9 @@ void MsgHandler::parseRrtNode(VisualizerWindow* window, const nav_msgs::RrtNode:
         // Redraw all edges in case they got erased
         std::map<int, nav_msgs::RrtNode::ConstPtr>::iterator it2;
         for(it2 = rrtNodes.begin(); it2 != rrtNodes.end(); ++it2) {
+            // skip the erased edge
             if (it == it2) continue;
+            // draw edge
             nav_msgs::RrtNode::ConstPtr node = it2->second;
             if (node->parent != -1) {
                 nav_msgs::RrtNode::ConstPtr parent = rrtNodes[node->parent];
@@ -178,7 +180,7 @@ void MsgHandler::parsePath(VisualizerWindow* window, const nav_msgs::Path::Const
         window->drawLine(
             Point(parent->x, parent->y),
             Point(thisNode->x, thisNode->y),
-            Scalar(0, 255, 0),  // green
+            Scalar(255, 255, 0),  // dark blue
             2
          );
     }

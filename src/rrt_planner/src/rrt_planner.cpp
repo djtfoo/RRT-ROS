@@ -11,29 +11,17 @@
 #define STATUS_ADVANCED 2
 #define STATUS_TRAPPED 0
 
-nav_msgs::OccupancyGrid::ConstPtr RrtPlanner::map_ = nullptr;
-float RrtPlanner::_incrementalStep = 4.f;
-
-ros::Subscriber RrtPlanner::map_sub_;
-ros::Subscriber RrtPlanner::pathreq_sub_;
-ros::Publisher RrtPlanner::path_pub_;
-ros::Publisher RrtPlanner::rrt_pub_;
-
-// for RRT state sampling
-std::vector<int> RrtPlanner::unpopulatedRegions;
-
 // Constructor
 RrtPlanner::RrtPlanner(ros::NodeHandle& nh) {
-    // subscribe to ROS topics
-    map_sub_ = nh.subscribe<nav_msgs::OccupancyGrid>("map", 1, mapCallback);
-    pathreq_sub_ = nh.subscribe<nav_msgs::PathRequest>("pathreq", 1, pathreqCallback);
-
     // advertise ROS topics
     path_pub_ = nh.advertise<nav_msgs::Path>("path", 1);
     rrt_pub_ = nh.advertise<nav_msgs::RrtNode>("rrtnode", 1);
 
     // init RNG with random seed
     srand(time(NULL));
+
+    // wait some time after publishers get created
+    ros::Duration(1.0).sleep();
 }
 
 // Publish path to ROS topic
@@ -78,51 +66,13 @@ void RrtPlanner::publishPath(Rrt* goalNode) {
     ROS_INFO("Published Path.");
 }
 
-// Subscriber callback
-void RrtPlanner::mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map) {
-    ROS_INFO("Map message received");
-
-    // Save map
-    map_ = map;
-}
-
-void RrtPlanner::pathreqCallback(const nav_msgs::PathRequest::ConstPtr& pathreq) {
-    ROS_INFO("Path Request message received");
-
-    // Set start and end positions
-    Coord start(pathreq->start_x, pathreq->start_y);
-    Coord goal(pathreq->goal_x, pathreq->goal_y);
-
-    // Validate start and end coordinates first (command line publisher did not validate them)
-    int gridWidth = map_->width / map_->gridsize;
-    bool isValid = true;
-
-    int startX = start._x / map_->gridsize;
-    int startY = start._y / map_->gridsize;
-    if (map_->occupancy[startY*gridWidth + startX]) {
-        ROS_INFO("Start position is in an obstacle");
-        isValid = false;
-    }
-    int goalX = goal._x / map_->gridsize;
-    int goalY = goal._y / map_->gridsize;
-    if (map_->occupancy[goalY*gridWidth + goalX]) {
-        ROS_INFO("Goal position is in an obstacle");
-        isValid = false;
-    }
-
-    // Plan path
-    if (isValid) {
-        ROS_INFO("Starting RRT.");
-        planPath(start, goal);
-    }
-    else
-        ROS_INFO("Not starting RRT as start/goal position is invalid.");
-}
-
 // Path planner algorithm (RRT)
-void RrtPlanner::planPath(const Coord& start, const Coord& goal) {
+void RrtPlanner::planPath(nav_msgs::OccupancyGrid::ConstPtr map, const Coord& start, const Coord& goal) {
 
     ROS_INFO("Init Node.");
+
+    // store reference to map (for convenience)
+    map_ = map;
 
     // initialise RRT at start position
     Rrt node(start, nullptr);
@@ -135,7 +85,7 @@ void RrtPlanner::planPath(const Coord& start, const Coord& goal) {
     }
     _incrementalStep = map_->gridsize - 1;
 
-    // TODO: sleep only if visualization is true
+    // sleep for a short time
     ros::Duration(0.25).sleep();
 
     ROS_INFO("Build RRT.");
@@ -218,7 +168,7 @@ Rrt* RrtPlanner::buildRrt(Rrt* rrt, int iters, const Coord& goal) {
             }
 
 
-            // TODO: sleep only if visualization is true
+            // sleep for a short time
             ros::Duration(0.002).sleep();
 
             // no. nodes in RRT increased

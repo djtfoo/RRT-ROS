@@ -43,12 +43,8 @@ int main(int argc, char* argv[]) {
     ss << argv[4];
     ss >> pathReq.goal_y;
 
-    // Parse grid size argument
-    ss << argv[1];
-    unsigned int gs;  // grid size
-    ss >> gs;
-
     // Publish to topic
+    ros::Duration(1.0).sleep();
     pathreq_pub.publish(pathReq);
 
     ROS_INFO("Published to /pathreq");

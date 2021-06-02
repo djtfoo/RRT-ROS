@@ -18,57 +18,52 @@ public:
     // Constructor
     RrtPlanner(ros::NodeHandle& nh);
 
-protected:
     // Function to plan path
-    static void planPath(const Coord& start, const Coord& goal);
+    void planPath(nav_msgs::OccupancyGrid::ConstPtr map, const Coord& start, const Coord& goal);
 
-    // RRT helper functions to do stuff like compute Voronoi region, get config, collision detection, etc
-    static Rrt* buildRrt(Rrt* rrt, int iters, const Coord& goal);
-    static void randomState(Coord* state, Coord* currState, const Coord& goal, int radius);
-    static int extend(Rrt* rrt, const Coord& state, Rrt** xNew, const Coord& goal);
+protected:
 
-    static Rrt* nearestNeighbour(Rrt* rrt, const Coord& state);
-    static Rrt* nearestNeighbourSearch(Rrt* rrt, const Coord& state, float* dist);
-    static float neighbourDistanceMetric(Rrt* rrt, const Coord& state);
+    // RRT helper functions
+    Rrt* buildRrt(Rrt* rrt, int iters, const Coord& goal);
+    void randomState(Coord* state, Coord* currState, const Coord& goal, int radius);
+    int extend(Rrt* rrt, const Coord& state, Rrt** xNew, const Coord& goal);
 
-    static bool newState(const Coord& state, Rrt* xNear, float input, Coord* nState, const Coord& goal);
-    static bool noCollision(const Coord& startState, const Coord& newState);
+    Rrt* nearestNeighbour(Rrt* rrt, const Coord& state);
+    Rrt* nearestNeighbourSearch(Rrt* rrt, const Coord& state, float* dist);
+    float neighbourDistanceMetric(Rrt* rrt, const Coord& state);
+
+    bool newState(const Coord& state, Rrt* xNear, float input, Coord* nState, const Coord& goal);
+    bool noCollision(const Coord& startState, const Coord& newState);
 
     // publish path
-    static void publishPath(Rrt* goalNode);
+    void publishPath(Rrt* goalNode);
 
 private:
-    // Subscriber
-    static ros::Subscriber map_sub_;
-    static ros::Subscriber pathreq_sub_;
-
-    // Subscriber callback
-    static void mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map);
-    static void pathreqCallback(const nav_msgs::PathRequest::ConstPtr& pathreq);
-    static nav_msgs::OccupancyGrid::ConstPtr map_;
-
-    static bool isObstacle(const Coord& coord);
-    static bool isObstacle(int gridX, int gridY);
+    nav_msgs::OccupancyGrid::ConstPtr map_;
 
     // Publisher
-    static ros::Publisher path_pub_;
-    static ros::Publisher rrt_pub_;
+    ros::Publisher path_pub_;
+    ros::Publisher rrt_pub_;
 
     // Publisher function
-    static void publishRrtNode(Rrt* node);
+    void publishRrtNode(Rrt* node);
 
     // RRT variables
     // TODO: maybe make start and end static variables instead of constantly passing it as a variable
     //static Coord start;
     //static Coord end;
-    static float _incrementalStep;  // represents input to next state (TBD: change to a class to accommodate nonholonomy/more complicated inputs)
+    float _incrementalStep;  // represents input to next state
 
     // overall state of map for randomState sampling
-    const static int numRegionsX = 50;//20;
-    const static int numRegionsY = 50;//20;
-    const static int regionSizeX = 10;//25;
-    const static int regionSizeY = 10;//25;
-    static std::vector<int> unpopulatedRegions;
+    const int numRegionsX = 50;//20;
+    const int numRegionsY = 50;//20;
+    const int regionSizeX = 10;//25;
+    const int regionSizeY = 10;//25;
+    std::vector<int> unpopulatedRegions;
+
+    // RRT helper functions
+    bool isObstacle(const Coord& coord);
+    bool isObstacle(int gridX, int gridY);
 };
 
 #endif	// RRT_PLANNER_H_

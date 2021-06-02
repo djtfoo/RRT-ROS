@@ -66,7 +66,7 @@ void RrtPlanner::publishPath(Rrt* goalNode) {
     path_pub_.publish(pathMsg);
 
     // sleep for a short time after publishing
-    ros::Duration(0.002).sleep();
+    ros::Duration(0.01).sleep();
 
     ROS_INFO("Published Path.");
 }
@@ -93,7 +93,7 @@ void RrtPlanner::planPath(nav_msgs::OccupancyGrid::ConstPtr map, const Coord& st
     ROS_INFO("Build RRT.");
 
     // compute RRT
-    Rrt* goalNode = buildRrt(&node, 4000, goal);
+    Rrt* goalNode = buildRrt(&node, 10000, goal);
     if (goalNode != nullptr) {  // managed to reach the goal
         ROS_INFO("A path has been found.");
         // publish the path
@@ -124,7 +124,7 @@ void RrtPlanner::publishRrtNode(Rrt* node) {
     rrt_pub_.publish(rrtnode);
 
     // sleep for a short time after publishing
-    ros::Duration(0.01).sleep();
+    ros::Duration(0.01).sleep();  // 10 ms
 
     ROS_INFO("Published RRT Node.");
 }

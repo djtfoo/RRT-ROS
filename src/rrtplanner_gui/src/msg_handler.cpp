@@ -20,15 +20,7 @@ void MsgHandler::parseMap(VisualizerWindow** window, const nav_msgs::OccupancyGr
     int gridWidth = map->width / map->gridsize;
 
     // draw obstacles
-    for (int i = 0; i < map->occupancy.size(); ++i) {
-        //std::cout << (map->occupancy[i] ? 1 : 0);
-        if (map->occupancy[i]) {  // is obstacle
-            // compute grid coordinate
-            int grid_x = i % gridWidth;
-            int grid_y = i / gridWidth;
-            fillGrid(*window, grid_x, grid_y, map->gridsize, Scalar(255, 255, 255));
-        }
-    }
+    drawMap(*window, map, false);
 
     // draw grid lines if enabled
     if (showGridLines) {
@@ -50,6 +42,25 @@ void MsgHandler::parseMap(VisualizerWindow** window, const nav_msgs::OccupancyGr
                 Scalar(255,255,255),
                 1
              );
+        }
+    }
+}
+
+void MsgHandler::drawMap(VisualizerWindow* window, const nav_msgs::OccupancyGrid::ConstPtr& map, bool fillEmpty) {
+    // no. grids along width
+    int gridWidth = map->width / map->gridsize;
+
+    // draw obstacles
+    for (int i = 0; i < map->occupancy.size(); ++i) {
+        //std::cout << (map->occupancy[i] ? 1 : 0);
+        // compute grid coordinate
+        int grid_x = i % gridWidth;
+        int grid_y = i / gridWidth;
+        if (map->occupancy[i]) {  // is obstacle
+            fillGrid(window, grid_x, grid_y, map->gridsize, Scalar(255, 255, 255));
+        }
+        else if (fillEmpty) {  // empty cell
+            fillGrid(window, grid_x, grid_y, map->gridsize, Scalar(0, 0, 0));
         }
     }
 }
@@ -89,7 +100,7 @@ void MsgHandler::parsePathRequest(VisualizerWindow* window, const nav_msgs::Path
     );
 }
 
-void MsgHandler::parseRrtNode(VisualizerWindow* window, const nav_msgs::RrtNode::ConstPtr& rrtNode) {
+void MsgHandler::parseRrtNode(VisualizerWindow* window, const nav_msgs::RrtNode::ConstPtr& rrtNode, const nav_msgs::OccupancyGrid::ConstPtr& map, const nav_msgs::PathRequest::ConstPtr& pathreq) {
 
     // check if RRT Node is a root node
     if (rrtNode->parent == -1)  // node has no parent
@@ -97,24 +108,37 @@ void MsgHandler::parseRrtNode(VisualizerWindow* window, const nav_msgs::RrtNode:
 
     //std::cout << rrtNode->id << ", " << rrtNode->parent << std::endl;
 
-    // if rrtNode already in map, means it got updated
+    // if rrtNode already in map, means it got updated; erase the old edge and redraw
     std::map<int, nav_msgs::RrtNode::ConstPtr>::iterator it;
     it = rrtNodes.find(rrtNode->id);
     if (it != rrtNodes.end()) {  // rrtNode already in map
-        // erase existing path -- TODO: clean up the map properly, as pixels are getting deleted
-        /*if (rrtNode->parent != -1) {
-    //std::cout << "Erase" << std::endl;
-            nav_msgs::RrtNode::ConstPtr parent = rrtNodes[it->second->parent];
-            window->drawLine(
-                Point(parent->x, parent->y),
-                Point(rrtNode->x, rrtNode->y),
-                Scalar(0, 0, 0),
-                1
-            );
-    //std::cout << "Erased" << std::endl;
-        }*/
+        // Erase the removed edge
+        nav_msgs::RrtNode::ConstPtr parent = rrtNodes[it->second->parent];
+        window->drawLine(
+            Point(parent->x, parent->y),
+            Point(it->second->x, it->second->y),
+            Scalar(0, 0, 0),
+            1
+        );
+        // Redraw all edges in case they got erased
+        std::map<int, nav_msgs::RrtNode::ConstPtr>::iterator it2;
+        for(it2 = rrtNodes.begin(); it2 != rrtNodes.end(); ++it2) {
+            if (it == it2) continue;
+            nav_msgs::RrtNode::ConstPtr node = it2->second;
+            if (node->parent != -1) {
+                nav_msgs::RrtNode::ConstPtr parent = rrtNodes[node->parent];
+                window->drawLine(
+                    Point(parent->x, parent->y),
+                    Point(node->x, node->y),
+                    Scalar(255, 255, 0),
+                    1
+                );
+            }
+        }
+        // Redraw start and goal nodes in case they got erased
+        parsePathRequest(window, pathreq);
     }
-    rrtNodes[rrtNode->id] = rrtNode;  // add rrtNode to map
+    rrtNodes[rrtNode->id] = rrtNode;  // add updated rrtNode to map
 
     // draw edge from rrtNode to parent
     if (rrtNode->parent != -1) {

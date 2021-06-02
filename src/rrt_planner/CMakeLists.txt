@@ -10,7 +10,6 @@ project(rrt_planner)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rostime
-  message_generation
   nav_msgs
 )
 #find_package(Boost REQUIRED COMPONENTS thread)
@@ -71,11 +70,11 @@ link_directories(${catkin_LIBRARY_DIRS})
 # )
 
 ## Generate added messages and services with any dependencies listed here
- generate_messages(
-   DEPENDENCIES
-   std_msgs  # Or other packages containing msgs
-   nav_msgs
- )
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs  # Or other packages containing msgs
+#   nav_msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -129,9 +128,6 @@ include_directories(
 set(rrt_planner_SRCS
   src/rrt_planner.cpp
 )
-set(mapserver_SRCS
-  src/lodepng/lodepng.cpp
-)
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
@@ -147,7 +143,6 @@ set(mapserver_SRCS
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(planner_node ${rrt_planner_SRCS} src/planner_node.cpp)
-add_executable(mapserver_node ${mapserver_SRCS} src/mapserver_node.cpp)
 add_executable(pathrequest_node src/pathrequest_node.cpp)
 
 ## Rename C++ executable without prefix
@@ -164,15 +159,11 @@ add_executable(pathrequest_node src/pathrequest_node.cpp)
  target_link_libraries(planner_node
    ${catkin_LIBRARIES}
  )
- target_link_libraries(mapserver_node
-   ${catkin_LIBRARIES}
- )
  target_link_libraries(pathrequest_node
    ${catkin_LIBRARIES}
  )
 
 add_dependencies(planner_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(mapserver_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(pathrequest_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #############

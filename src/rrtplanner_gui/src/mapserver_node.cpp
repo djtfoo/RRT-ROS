@@ -4,10 +4,16 @@
 #include <ros/ros.h>
 
 #include <nav_msgs/OccupancyGrid.h>
-#include "lodepng/lodepng.h"
+//#include "lodepng/lodepng.h"
+
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
 
 #include <iostream>  // for printing msg
 #include <sstream>
+
+using namespace cv;
 
 class MapParser {
 public:
@@ -17,36 +23,27 @@ public:
     }
 
     bool parseMap(std::string filename, unsigned int gridSize = 5) {
-        std::vector<unsigned char> png;
-        std::vector<unsigned char> image; //the raw pixels
-        unsigned width, height;
 
-        //load and decode map file (for now, we only accept PNG files)
-        unsigned error = lodepng::load_file(png, filename);
-        if (error) {
-            ROS_INFO("Error when loading map image file");
-            //ROS_INFO(lodepng_error_text(error));
-            return false;
-        }
-        error = lodepng::decode(image, width, height, png);
-        if (error) {
-            ROS_INFO("Error when decoding map image");
-            //ROS_INFO(lodepng_error_text(error));
+        //load map file using OpenCV
+        Mat img = imread(filename, IMREAD_UNCHANGED);
+        //img.convertTo(img, CV_8U);
+        if (img.rows == 0 && img.rows == 0) {
+            ROS_INFO("Failed to load file.");
             return false;
         }
 
         // TODO: check if image is divisible by gridsize?
-        std::cout << width << "," << height << std::endl;
+        std::cout << "Image dimensions: " << img.rows << "," << img.cols << std::endl;
 
         // parse map image into grids
         std::vector<unsigned char> occupanyData;    // occupancy data of map grids
-        parseMapData(image, width, height, gridSize, occupanyData);
+        parseMapData(img, img.cols, img.rows, gridSize, occupanyData);
         
         // publish map to ROS topic
         nav_msgs::OccupancyGrid og;
         og.name = filename;
-        og.width = width;
-        og.height = height;
+        og.width = img.cols;
+        og.height = img.rows;
         og.gridsize = gridSize;
         og.occupancy = occupanyData;
         map_pub_.publish(og);
@@ -58,22 +55,25 @@ private:
     // Publisher
     ros::Publisher map_pub_;
 
-    void parseMapData(const std::vector<unsigned char>& image, unsigned int width, unsigned int height, unsigned int gridSize, std::vector<unsigned char>& occupanyData) {
+    void parseMapData(const Mat& img, unsigned int width, unsigned int height, unsigned int gridSize, std::vector<unsigned char>& occupanyData) {
 
         ROS_INFO("Parsing map data ...");
         
-        int threshold = ceil(gridSize*gridSize*0.5);    // threshold for whether a grid is an obstacle
-        
+        int cn = img.channels();
+        std::cout << "No. channels: " << cn << std::endl;
+        int threshold = ceil(gridSize*gridSize*0.5);    // threshold no. obstacle pixels to determine if a grid is an obstacle
         // iterate through grids
-        for (int row = 0; row < height; row += gridSize) {
-            for (int col = 0; col < width; col += gridSize) {
+        for (int col = 0; col < width; col += gridSize) {
+            for (int row = 0; row < height; row += gridSize) {
                 // compute occupancy for each grid
                 int obstacleCount = 0;  // no. obstacle pixels within this grid
                 for (int i = row; i < row+gridSize; ++i) {
                     for (int j = col; j < col+gridSize; ++j) {
                         // compute color of pixel
-                        int pixelIdx = 4*(i*height + j);  // index of pixel's RGBA values
-                        int color = image[pixelIdx] + image[pixelIdx+1] + image[pixelIdx+2];    // sum of pixel's RGB values
+                        int b = img.data[j*width*cn + i*cn];
+                        int g = img.data[j*width*cn + i*cn + 1];
+                        int r = img.data[j*width*cn + i*cn + 2];
+                        int color = b + g + r;    // sum of pixel's RGB values
                         // check if pixel is an obstacle
                         if (color/3 > 200)  // obstacle pixel is white
                             ++obstacleCount;
@@ -82,16 +82,16 @@ private:
                 // check if grid is occupied or not: obstacleCount > threshold, it is occupied
                 unsigned char occupied = (obstacleCount >= threshold) ? 1 : 0;
                 occupanyData.push_back(occupied);
-                std::cout << (occupied ? 1 : 0);
+                //	std::cout << (occupied ? 1 : 0);
             }
-            std::cout << std::endl;
+            //std::cout << std::endl;
         }
     }
 };
 
 int main(int argc, char* argv[]) {
     // check args first
-    if (argc < 2) {
+    if (argc < 3) {
         ROS_INFO("Missing arguments");  // TODO: provide some info and instructions
         return 0;
     }
@@ -114,7 +114,7 @@ int main(int argc, char* argv[]) {
     unsigned int gs;  // grid size
     ss >> gs;
 
-    std::cout << "Map file: " << argv[2] << std::endl;
+    std::cout << "Map file: " << argv[1] << std::endl;
     std::cout << "Grid size (pixels): " << gs << std::endl;
 
     // Parse map

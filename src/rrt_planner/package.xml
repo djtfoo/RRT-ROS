@@ -52,7 +52,6 @@
 
   <build_depend>roscpp</build_depend>
   <build_depend>rostime</build_depend>
-  <build_depend>message_generation</build_depend>
   <build_export_depend>roscpp</build_export_depend>
 
   <exec_depend>roscpp</exec_depend>

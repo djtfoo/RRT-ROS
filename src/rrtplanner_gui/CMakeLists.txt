@@ -149,6 +149,7 @@ set(pathrequest_SRCS
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/rrtplanner_gui_node.cpp)
 add_executable(visualizer_node ${visualizer_SRCS} ${pathrequest_SRCS} src/visualizer_node.cpp)
+add_executable(mapserver_node src/mapserver_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -165,8 +166,13 @@ add_executable(visualizer_node ${visualizer_SRCS} ${pathrequest_SRCS} src/visual
    ${catkin_LIBRARIES}
    ${OpenCV_LIBRARIES}
  )
+ target_link_libraries(mapserver_node
+   ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES}
+ )
 
 add_dependencies(visualizer_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(mapserver_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##

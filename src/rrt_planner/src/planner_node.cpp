@@ -97,8 +97,6 @@ int main(int argc, char* argv[]) {
 
     ROS_INFO("Planner node started");
 
-    // TODO: use argv to enable/disable visualization
-
     // Don't exit the program
     ros::spin();
 }

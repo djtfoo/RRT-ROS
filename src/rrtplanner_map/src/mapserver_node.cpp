@@ -18,7 +18,6 @@ using namespace cv;
 class MapServer {
 public:
     MapServer(ros::NodeHandle& nh) {
-        // TODO: sub/advertise options
         map_pub_ = nh.advertise<nav_msgs::OccupancyGrid>("map", 1);
     }
 

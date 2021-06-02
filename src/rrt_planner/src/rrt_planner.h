@@ -40,9 +40,6 @@ protected:
     void publishRrtNode(Rrt* node);
 
     // RRT variables
-    // TODO: maybe make start and end static variables instead of constantly passing it as a variable
-    //static Coord _start;
-    //static Coord _end;
     float _incrementalStep;  // represents input to next state
 
 private:

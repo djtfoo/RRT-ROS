@@ -20,7 +20,7 @@ void RrtStarPlanner::addAndOptimiseNodes(Rrt* rrt, Rrt* xNew) {
         return;
     }
 
-    // TODO: remove parent first, but currently buggy
+    // remove xNew's parent first
     xNew->getParent()->removeChild(xNew);
     xNew->setParent(nullptr);
 
@@ -78,7 +78,7 @@ void RrtStarPlanner::tryRewireNodes(Rrt* nearbyNode, Rrt* xNew, float distance) 
 
     // check if can rewire nearby node
     if (checkNoCollision(nearbyNode, xNew, distance)) {  // if no obstacles
-        // TODO: remove nearby node from parent, but currently buggy
+        // remove nearby node from parent
         nearbyNode->getParent()->removeChild(nearbyNode);
         // rewire by setting new parent
         nearbyNode->setParent(xNew);

@@ -3,6 +3,10 @@
 #include <sstream>
 #include <math.h>
 
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
+
 #include <nav_msgs/OccupancyGrid.h>
 
 #include "gui/visualizer_window.h"
@@ -63,21 +67,25 @@ private:
     // Publisher
     static ros::Publisher map_pub_;  // publisher for /map topic
     static void publishMapCallback() {
-        //Mat img = (window_->getImage());
+        Mat img = (window_->getImage());
         // Create map
-        //MapParser::parseMapData(*img, img.cols, img.rows, gridSize, occupanyData);
+        std::vector<unsigned char> occupanyData;    // occupancy data of map grids
+        MapParser::parseMapData(img, width, height, gridSize, occupanyData);
         
         // Prepare ROS topic
-        /*nav_msgs::OccupancyGrid og;
+        nav_msgs::OccupancyGrid og;
         og.name = "maps/custom";
-        og.width = img.cols;
-        og.height = img.rows;
+        og.width = width;
+        og.height = height;
         og.gridsize = gridSize;
         og.occupancy = occupanyData;
         // Publish to ROS topic
-        map_pub_.publish(og);*/
+        map_pub_.publish(og);
 
         ROS_INFO("Published to /map successfully.");
+
+        // close window and exit
+        ros::shutdown();
     }
 
     // Mouse Event Callback

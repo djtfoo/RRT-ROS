@@ -95,11 +95,30 @@ void MsgHandler::parseRrtNode(VisualizerWindow* window, const nav_msgs::RrtNode:
     if (rrtNode->parent == -1)  // node has no parent
         rrtNodes.clear();
 
-    // add rrtNode to map
-    rrtNodes[rrtNode->id] = rrtNode;
+    //std::cout << rrtNode->id << ", " << rrtNode->parent << std::endl;
+
+    // if rrtNode already in map, means it got updated
+    std::map<int, nav_msgs::RrtNode::ConstPtr>::iterator it;
+    it = rrtNodes.find(rrtNode->id);
+    if (it != rrtNodes.end()) {  // rrtNode already in map
+        // erase existing path
+        if (rrtNode->parent != -1) {
+    //std::cout << "Erase" << std::endl;
+            nav_msgs::RrtNode::ConstPtr parent = rrtNodes[rrtNode->parent];
+            window->drawLine(
+                Point(parent->x, parent->y),
+                Point(rrtNode->x, rrtNode->y),
+                Scalar(0, 0, 0),
+                1
+            );
+    //std::cout << "Erased" << std::endl;
+        }
+    }
+    rrtNodes[rrtNode->id] = rrtNode;  // add rrtNode to map
 
     // draw edge from rrtNode to parent
     if (rrtNode->parent != -1) {
+    //std::cout << "Draw" << std::endl;
         //std::cout << "Trying to draw ..." << std::endl;
         nav_msgs::RrtNode::ConstPtr parent = rrtNodes[rrtNode->parent];
         //std::cout << rrtNode->parent << ": " << parent->x << "," << parent->y << " | " << rrtNode->id << ": " << rrtNode->x << "," << rrtNode->y << std::endl;
@@ -109,6 +128,7 @@ void MsgHandler::parseRrtNode(VisualizerWindow* window, const nav_msgs::RrtNode:
             Scalar(255, 255, 0),
             1
          );
+    //std::cout << "Drawn" << std::endl;
     }
 }
 

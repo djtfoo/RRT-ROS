@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 #include "rrt_planner.h"
+#include "rrtstar_planner.h"
 
 class RrtPlannerInterface {
 public:
@@ -59,7 +60,7 @@ private:
         if (isValid) {
             ROS_INFO("Starting RRT.");
             // Create RRT Planner
-            RrtPlanner rrtPlanner(*nh_);
+            RrtStarPlanner rrtPlanner(*nh_);
             rrtPlanner.planPath(map_, start, goal);
         }
         else

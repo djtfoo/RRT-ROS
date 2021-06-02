@@ -13,6 +13,11 @@
 
 #include "gui/button.h"
 
+enum RrtVersion {
+    Basic_RRT,  // 0
+    RRT_Star,   // 1
+};
+
 class VisualizerInterface {
 public:
     VisualizerInterface(ros::NodeHandle& nh)
@@ -27,7 +32,8 @@ public:
         pathreq_pub_ = nh.advertise<nav_msgs::PathRequest>("pathreq", 1);
 
         // add Button
-        Button::createButton(Anchor(BottomLeft, 50, 5), 100, 30, 180, 180, 180, "Plan Path", (void*)publishPathRequest);
+        Button::createButton(Anchor(BottomLeft, 50, 5), 160, 30, 180, 180, 180, "Plan Path (RRT)", (void*)publishPathRequest_Rrt);
+        Button::createButton(Anchor(BottomLeft, 250, 5), 170, 30, 180, 180, 180, "Plan Path (RRT*)", (void*)publishPathRequest_RrtStar);
     }
     ~VisualizerInterface() {
         if (window_ != nullptr)
@@ -110,7 +116,7 @@ private:
 
     // Publisher
     static ros::Publisher pathreq_pub_;  // publisher for /pathreq topic
-    static void publishPathRequest() {
+    static void publishPathRequest(int rrtVer) {
         if (startX_ == -1 || startY_ == -1 || goalX_ == -1 || goalY_ == -1) {
             ROS_INFO("Both start and goal position must be set to publish PathRequest.");
             return;
@@ -121,6 +127,7 @@ private:
         pathreq.start_y = (startY_ + 0.5f) * map_->gridsize;
         pathreq.goal_x = (goalX_ + 0.5f) * map_->gridsize;
         pathreq.goal_y = (goalY_ + 0.5f) * map_->gridsize;
+        pathreq.rrt_ver = rrtVer;
 
         // Publish message
         pathreq_pub_.publish(pathreq);
@@ -128,6 +135,12 @@ private:
 
         // clear
         startX_ = startY_ = goalX_ = goalY_ = -1;
+    }
+    static void publishPathRequest_Rrt() {
+        publishPathRequest(Basic_RRT);
+    }
+    static void publishPathRequest_RrtStar() {
+        publishPathRequest(RRT_Star);
     }
 
     // Publisher message data

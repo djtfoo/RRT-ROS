@@ -6,7 +6,7 @@
 
 int main(int argc, char* argv[]) {
     // check args first
-    if (argc <= 4) {
+    if (argc <= 5) {
         std::cout << "Missing arguments" << std::endl;  // TODO: provide some info and instructions
         return 0;
     }
@@ -42,6 +42,11 @@ int main(int argc, char* argv[]) {
     ss.str("");
     ss << argv[4];
     ss >> pathReq.goal_y;
+
+    ss.clear();
+    ss.str("");
+    ss << argv[5];
+    ss >> pathReq.rrt_ver;
 
     // Publish to topic
     ros::Duration(1.0).sleep();

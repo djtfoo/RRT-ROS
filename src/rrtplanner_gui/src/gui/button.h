@@ -5,7 +5,7 @@
 #include <opencv2/highgui.hpp>
 #include <string>
 
-#include "../visualizer_window.h"
+#include "visualizer_window.h"
 
 using namespace cv;
 

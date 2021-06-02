@@ -7,8 +7,8 @@
 #include <nav_msgs/Path.h>
 #include <nav_msgs/PathRequest.h>
 
-#include "visualizer_window.h"
 #include "msg_handler.h"
+#include "gui/visualizer_window.h"
 #include "pathrequest/pathrequest_handler.h"
 
 #include "gui/button.h"
@@ -43,6 +43,18 @@ public:
     }
 
 private:
+
+    // grid fill helper functions
+    static void clearGrid(VisualizerWindow* window, int gridX, int gridY, int gridsize) {
+    MsgHandler::fillGrid(window, gridX, gridY, gridsize, Scalar(0, 0, 0));
+}
+    static void fillStartGrid(VisualizerWindow* window, int gridX, int gridY, int gridsize) {
+    MsgHandler::fillGrid(window, gridX, gridY, gridsize, Scalar(0, 255, 0));
+}
+    static void fillGoalGrid(VisualizerWindow* window, int gridX, int gridY, int gridsize) {
+    MsgHandler::fillGrid(window, gridX, gridY, gridsize, Scalar(0, 0, 255));
+}
+
     // window
     static VisualizerWindow* window_;  // only 1 window
 
@@ -123,13 +135,13 @@ private:
 
     static void cleanStartGoalPos() {
         if (startX_ != -1 && startY_ != -1) {
-            PathRequestHandler::clearGrid(window_, startX_, startY_, map_->gridsize);
+            clearGrid(window_, startX_, startY_, map_->gridsize);
             // reset
             startX_ = -1;
             startY_ = -1;
         }
         if (goalX_ != -1 && goalY_ != -1) {
-            PathRequestHandler::clearGrid(window_, goalX_, goalY_, map_->gridsize);
+            clearGrid(window_, goalX_, goalY_, map_->gridsize);
             // reset
             goalX_ = -1;
             goalY_ = -1;
@@ -152,14 +164,14 @@ private:
             {
                 // clear fill of previous grid
                 if (startX_ != -1 && startY_ != -1)
-                    PathRequestHandler::clearGrid(window_, startX_, startY_, map_->gridsize);
+                    clearGrid(window_, startX_, startY_, map_->gridsize);
 
                 // save start grid coordinates
                 startX_ = grid_x;
                 startY_ = grid_y;
 
                 // draw fill for selected grid
-                PathRequestHandler::fillStartGrid(window_, grid_x, grid_y, map_->gridsize);
+                fillStartGrid(window_, grid_x, grid_y, map_->gridsize);
             }
             // check button click events
             else {
@@ -179,14 +191,14 @@ private:
             {
                 // clear fill of previous grid
                 if (goalX_ != -1 && goalY_ != -1)
-                    PathRequestHandler::clearGrid(window_, goalX_, goalY_, map_->gridsize);
+                    clearGrid(window_, goalX_, goalY_, map_->gridsize);
 
                 // save start grid coordinates
                 goalX_ = grid_x;
                 goalY_ = grid_y;
 
                 // draw fill for selected grid
-                PathRequestHandler::fillGoalGrid(window_, grid_x, grid_y, map_->gridsize);
+                fillGoalGrid(window_, grid_x, grid_y, map_->gridsize);
             }
         }
     }

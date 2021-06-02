@@ -6,7 +6,7 @@
 
 int main(int argc, char* argv[]) {
     // check args first
-    if (argc < 4) {
+    if (argc <= 4) {
         std::cout << "Missing arguments" << std::endl;  // TODO: provide some info and instructions
         return 0;
     }

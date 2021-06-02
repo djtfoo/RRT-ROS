@@ -28,6 +28,10 @@ public:
 
     void displayWindow();
 
+    Mat getImage() {
+        return _img;
+    }
+
     // draw shapes
     void drawCircle(const Point& center, int radius, const Scalar& color, int thickness);
     void drawRectangle(const Point& min, const Point& max, const Scalar& color, int thickness);

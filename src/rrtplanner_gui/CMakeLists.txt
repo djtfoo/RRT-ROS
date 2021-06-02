@@ -125,13 +125,16 @@ include_directories(
   ${OpenCV_INCLUDE_DIRS}
 )
 
-set(visualizer_SRCS
-  src/visualizer_window.cpp
+set(gui_SRCS
+  src/gui/visualizer_window.cpp
   src/msg_handler.cpp
   src/gui/button.cpp
 )
 set(pathrequest_SRCS
   src/pathrequest/pathrequest_handler.cpp
+)
+set(map_SRCS
+  src/map/mapparser.cpp
 )
 
 ## Declare a C++ library
@@ -148,8 +151,9 @@ set(pathrequest_SRCS
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/rrtplanner_gui_node.cpp)
-add_executable(visualizer_node ${visualizer_SRCS} ${pathrequest_SRCS} src/visualizer_node.cpp)
-add_executable(mapserver_node src/mapserver_node.cpp)
+add_executable(visualizer_node ${gui_SRCS} ${pathrequest_SRCS} src/visualizer_node.cpp)
+add_executable(mapserver_node ${map_SRCS} src/mapserver_node.cpp)
+add_executable(mapdrawer_node ${gui_SRCS} ${map_SRCS} src/mapdrawer_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -170,9 +174,14 @@ add_executable(mapserver_node src/mapserver_node.cpp)
    ${catkin_LIBRARIES}
    ${OpenCV_LIBRARIES}
  )
+ target_link_libraries(mapdrawer_node
+   ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES}
+ )
 
 add_dependencies(visualizer_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(mapserver_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(mapdrawer_node ${rrt_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##

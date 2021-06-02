@@ -8,7 +8,7 @@
 #include <nav_msgs/RrtNode.h>
 #include <nav_msgs/Path.h>
 
-#include "visualizer_window.h"
+#include "gui/visualizer_window.h"
 
 class MsgHandler {
 

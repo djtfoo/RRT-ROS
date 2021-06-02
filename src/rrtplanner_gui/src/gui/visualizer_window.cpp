@@ -1,5 +1,5 @@
 #include "visualizer_window.h"
-#include "gui/button.h"
+#include "button.h"
 
 VisualizerWindow::VisualizerWindow(const char* name, int w, int h) :
  _windowName((char*)name), _width(w), _height(h), _callback(NULL)
@@ -16,7 +16,7 @@ VisualizerWindow::VisualizerWindow(const char* name, int w, int h) :
 
 void VisualizerWindow::setMouseCallbackFunc(MouseCallback callback) {
     _callback = callback;
-    //setMouseCallback(_windowName, callback);
+    setMouseCallback(_windowName, callback);
 }
 
 void VisualizerWindow::displayWindow() {

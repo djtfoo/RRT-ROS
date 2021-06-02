@@ -64,10 +64,10 @@ private:
     static float _incrementalStep;  // represents input to next state (TBD: change to a class to accommodate nonholonomy/more complicated inputs)
 
     // overall state of map for randomState sampling
-    const static int numRegionsX = 20;
-    const static int numRegionsY = 20;
-    const static int regionSizeX = 25;
-    const static int regionSizeY = 25;
+    const static int numRegionsX = 50;//20;
+    const static int numRegionsY = 50;//20;
+    const static int regionSizeX = 10;//25;
+    const static int regionSizeY = 10;//25;
     static std::vector<int> unpopulatedRegions;
 };
 

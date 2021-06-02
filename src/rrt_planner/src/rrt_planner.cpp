@@ -129,6 +129,7 @@ void RrtPlanner::planPath(const Coord& start, const Coord& goal) {
     publishRrtNode(&node);
 
     // init unpopulated regions list
+    unpopulatedRegions.clear();
     for (int i = 0; i < numRegionsX*numRegionsY; ++i) {
         unpopulatedRegions.push_back(i);
     }
@@ -179,10 +180,8 @@ Rrt* RrtPlanner::buildRrt(Rrt* rrt, int iters, const Coord& goal) {
     Rrt* currState = rrt;
     int i = 1;
     while (i <= iters) {
-        std::cout << "Iteration: " << i << std::endl;
-//    if (currState == nullptr) {
-//        ROS_INFO("currState NULL");
-//    }
+        std::cout << "Building RRT Node: " << i << std::endl;
+
         // sample random state
         Coord xRand;
         randomState(&xRand, currState->getCoord(), goal, 20);
@@ -238,21 +237,9 @@ void RrtPlanner::randomState(Coord* state, Coord* currState, const Coord& goal, 
     std::cout << "randomState: ";
     // biased coin: 10% probability of sampling goal
     int coin = rand() % 100;
-    if ((unpopulatedRegions.size() <= 5 && coin < 20) || coin < 5) {
-        //if (coin < 8) {  // sample goal - high chance
-            state->_x = goal._x;
-            state->_y = goal._y;
-        //}`
-        /*else {  // TODO: determine if necessary to sample around goal zone
-            bool loop = true;
-            while (loop) {
-                int x = rand() % 5 - 3;
-                int y = rand() % 5 - 3;
-                state->_x = currState->_x + x;
-                state->_y = currState->_y + y;
-                loop = isObstacle(*state);  // is an obstacle; invalid state
-            }
-        }*/
+    if (coin < 5) {
+        state->_x = goal._x;
+        state->_y = goal._y;
     }
     else {
         // have a high chance of sampling outside occupied regions (split map into multiple small regions)
@@ -261,7 +248,6 @@ void RrtPlanner::randomState(Coord* state, Coord* currState, const Coord& goal, 
             if (coin < 80 && unpopulatedRegions.size() > 0) {
                 // randomly pick a region to sample from
                 int region = unpopulatedRegions[rand() % unpopulatedRegions.size()];
-//xRegion*numRegionsX + yRegion
                 int xRegion = region / numRegionsX;
                 int yRegion = region % numRegionsX;
 
@@ -272,25 +258,9 @@ void RrtPlanner::randomState(Coord* state, Coord* currState, const Coord& goal, 
                 state->_y = rand() % regionSizeY + min._y;
             }
             else {
-// idea 0: sample anywhere
-                //if (unpopulatedRegions.size() < 20) { // most regions explored
-                    state->_x = rand() % map_->width;
-                    state->_y = rand() % map_->height;
-                //}
-                /*else {
-    // idea 1: Sample within a small space around current state
-                    int x = 0, y = 0;
-                    while (x == 0 && y == 0) {
-                        x = rand() % radius - 0.5f*radius;
-                        y = rand() % radius - 0.5f*radius;
-                    }
-                    state->_x = currState->_x + x;
-                    state->_y = currState->_y + y;
-                    //state->_x = fmin(fmax(currState->_x + x, 0), map_->width - 1);
-                    //state->_y = fmin(fmax(currState->_y + y, 0), map_->height - 1);
-                    if (isObstacle(*state))  // is an obstacle; invalid state
-                        goto label;
-                }*/
+                // idea 0: sample anywhere
+                state->_x = rand() % map_->width;
+                state->_y = rand() % map_->height;
             }
             loop = isObstacle(*state);  // is an obstacle: invalid state; continue loop
         }
@@ -364,16 +334,13 @@ float RrtPlanner::neighbourDistanceMetric(Rrt* rrt, const Coord& state) {
 }
 
 bool RrtPlanner::newState(const Coord& state, Rrt* xNear, float input, Coord* nState, const Coord& goal) {
-
-// TODO: repeatedly try possible states
-
-    // TODO: should a state be on any pixel, or only a grid?
+    // TODO: should a state be on any pixel, or a continuous range?
     float vecX = state._x - xNear->getCoord()->_x;
     float vecY = state._y - xNear->getCoord()->_y;
 
     // change magnitude of vec to input
     double magnitude = sqrt(vecX*vecX + vecY*vecY);
-    if (magnitude < Coord::epsilon)  // sampled pretty much the same point as xNear
+    if (magnitude == 0.f)  // sampled pretty much the same point as xNear
         return false;
 
     // unit vector
@@ -391,8 +358,8 @@ bool RrtPlanner::newState(const Coord& state, Rrt* xNear, float input, Coord* nS
     nState->_y = xNear->getCoord()->_y + vecY;
 
     // also check more points along line, e.g. midpoint
-    Coord midpoint(xNear->getCoord()->_x + unitVecX * 0.5*magnitude,
-        xNear->getCoord()->_x + unitVecX * 0.5*magnitude);
+    Coord midpoint(xNear->getCoord()->_x + unitVecX * 0.5*input,
+        xNear->getCoord()->_y + unitVecY * 0.5*input);
 
     // check if new state is valid, i.e. input to new state does not intersect with obstacle
     return noCollision(*(xNear->getCoord()), *nState) && noCollision(*(xNear->getCoord()), midpoint);

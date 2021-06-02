@@ -69,6 +69,8 @@ void MsgHandler::fillGrid(VisualizerWindow* window, int gridX, int gridY, int gr
 }
 
 void MsgHandler::parsePathRequest(VisualizerWindow* window, const nav_msgs::PathRequest::ConstPtr& pathreq) {
+
+    std::cout << "Start: " << pathreq->start_x << "," << pathreq->start_y << std::endl;
     // draw start node
     window->drawCircle(
         Point(pathreq->start_x, pathreq->start_y),
@@ -77,6 +79,7 @@ void MsgHandler::parsePathRequest(VisualizerWindow* window, const nav_msgs::Path
         -1   // FILLED
     );
 
+    std::cout << "Goal: " << pathreq->goal_x << "," << pathreq->goal_y << std::endl;
     // draw goal node
     window->drawCircle(
         Point(pathreq->goal_x, pathreq->goal_y),
@@ -97,9 +100,9 @@ void MsgHandler::parseRrtNode(VisualizerWindow* window, const nav_msgs::RrtNode:
 
     // draw edge from rrtNode to parent
     if (rrtNode->parent != -1) {
-        std::cout << "Trying to draw ..." << std::endl;
+        //std::cout << "Trying to draw ..." << std::endl;
         nav_msgs::RrtNode::ConstPtr parent = rrtNodes[rrtNode->parent];
-        std::cout << rrtNode->parent << ": " << parent->x << "," << parent->y << " | " << rrtNode->id << ": " << rrtNode->x << "," << rrtNode->y << std::endl;
+        //std::cout << rrtNode->parent << ": " << parent->x << "," << parent->y << " | " << rrtNode->id << ": " << rrtNode->x << "," << rrtNode->y << std::endl;
         window->drawLine(
             Point(parent->x, parent->y),
             Point(rrtNode->x, rrtNode->y),

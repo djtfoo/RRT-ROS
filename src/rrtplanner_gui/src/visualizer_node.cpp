@@ -13,6 +13,11 @@
 
 #include "gui/button.h"
 
+enum RrtVersion {
+    Basic_RRT,  // 0
+    RRT_Star,   // 1
+};
+
 class VisualizerInterface {
 public:
     VisualizerInterface(ros::NodeHandle& nh)
@@ -27,7 +32,8 @@ public:
         pathreq_pub_ = nh.advertise<nav_msgs::PathRequest>("pathreq", 1);
 
         // add Button
-        Button::createButton(Anchor(BottomLeft, 50, 5), 100, 30, 180, 180, 180, "Plan Path", (void*)publishPathRequest);
+        Button::createButton(Anchor(BottomLeft, 50, 5), 160, 30, 180, 180, 180, "Plan Path (RRT)", (void*)publishPathRequest_Rrt);
+        Button::createButton(Anchor(BottomLeft, 250, 5), 170, 30, 180, 180, 180, "Plan Path (RRT*)", (void*)publishPathRequest_RrtStar);
     }
     ~VisualizerInterface() {
         if (window_ != nullptr)
@@ -38,7 +44,7 @@ public:
         while (true) {
             if (window_ != nullptr)
                 window_->displayWindow();
-            ros::Duration(0.002).sleep();  // wait 2ms
+            ros::Duration(0.05).sleep();  // wait 10ms
         }
     }
 
@@ -64,6 +70,10 @@ private:
     ros::Subscriber rrt_sub_;  // subscribed to /rrtnode topic
     ros::Subscriber path_sub_;  // subscribed to /path topic
 
+    // Subscriber messages
+    static nav_msgs::OccupancyGrid::ConstPtr map_;
+    static nav_msgs::PathRequest::ConstPtr pathreq_;
+
     // Subscriber callback
     static void mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map) {
         // store reference to map data
@@ -74,9 +84,9 @@ private:
         window_->setMouseCallbackFunc(processMouseEvent);
     }
     static void pathreqCallback(const nav_msgs::PathRequest::ConstPtr& pathreq) {
+        // store reference to pathreq data
+        pathreq_ = pathreq;
         if (window_ != nullptr) {
-            // clear start and goal nodes
-            //cleanStartGoalPos();
             // clear everything by drawing out the map again from scratch
             MsgHandler::parseMap(&window_, map_, false);
             // set mouse click event callback
@@ -89,8 +99,10 @@ private:
     }
     static void rrtnodeCallback(const nav_msgs::RrtNode::ConstPtr& rrtNode) {
         // have a "RrtNode Parser" to draw RRT nodes and edges on VisualizerWindow
-        if (window_ != nullptr)
-            MsgHandler::parseRrtNode(window_, rrtNode);
+        if (window_ != nullptr) {
+            // draw nodes
+            MsgHandler::parseRrtNode(window_, rrtNode, map_, pathreq_);
+        }
         else
             ROS_INFO("Received message from /rrtnode, but no window is currently open.");
     }
@@ -102,12 +114,9 @@ private:
             ROS_INFO("Received message from /path, but no window is currently open.");
     }
 
-    // Subscriber messages
-    static nav_msgs::OccupancyGrid::ConstPtr map_;
-
     // Publisher
     static ros::Publisher pathreq_pub_;  // publisher for /pathreq topic
-    static void publishPathRequest() {
+    static void publishPathRequest(int rrtVer) {
         if (startX_ == -1 || startY_ == -1 || goalX_ == -1 || goalY_ == -1) {
             ROS_INFO("Both start and goal position must be set to publish PathRequest.");
             return;
@@ -118,6 +127,7 @@ private:
         pathreq.start_y = (startY_ + 0.5f) * map_->gridsize;
         pathreq.goal_x = (goalX_ + 0.5f) * map_->gridsize;
         pathreq.goal_y = (goalY_ + 0.5f) * map_->gridsize;
+        pathreq.rrt_ver = rrtVer;
 
         // Publish message
         pathreq_pub_.publish(pathreq);
@@ -125,6 +135,12 @@ private:
 
         // clear
         startX_ = startY_ = goalX_ = goalY_ = -1;
+    }
+    static void publishPathRequest_Rrt() {
+        publishPathRequest(Basic_RRT);
+    }
+    static void publishPathRequest_RrtStar() {
+        publishPathRequest(RRT_Star);
     }
 
     // Publisher message data
@@ -206,6 +222,7 @@ private:
 
 VisualizerWindow* VisualizerInterface::window_ = nullptr;
 nav_msgs::OccupancyGrid::ConstPtr VisualizerInterface::map_ = nullptr;
+nav_msgs::PathRequest::ConstPtr VisualizerInterface::pathreq_ = nullptr;
 ros::Publisher VisualizerInterface::pathreq_pub_;
 
 int VisualizerInterface::startX_ = -1;

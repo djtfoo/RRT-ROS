@@ -26,17 +26,24 @@ protected:
     // RRT helper functions
     Rrt* buildRrt(Rrt* rrt, int iters, const Coord& goal);
     void randomState(Coord* state, Coord* currState, const Coord& goal, int radius);
-    int extend(Rrt* rrt, const Coord& state, Rrt** xNew, const Coord& goal);
+    int extend(Rrt* rrt, const Coord& state, Rrt** xNew);
+    virtual void addToRrt(Rrt* rrt, Rrt* xNear, Rrt* xNew);
 
     Rrt* nearestNeighbour(Rrt* rrt, const Coord& state);
     Rrt* nearestNeighbourSearch(Rrt* rrt, const Coord& state, float* dist);
     float neighbourDistanceMetric(Rrt* rrt, const Coord& state);
 
-    bool newState(const Coord& state, Rrt* xNear, float input, Coord* nState, const Coord& goal);
+    bool newState(const Coord& state, Rrt* xNear, float input, Coord* nState);
     bool noCollision(const Coord& startState, const Coord& newState);
 
-    // publish path
-    void publishPath(Rrt* goalNode);
+    // Publisher functions
+    void publishRrtNode(Rrt* node);
+
+    // RRT variables
+    // TODO: maybe make start and end static variables instead of constantly passing it as a variable
+    //static Coord _start;
+    //static Coord _end;
+    float _incrementalStep;  // represents input to next state
 
 private:
     nav_msgs::OccupancyGrid::ConstPtr map_;
@@ -44,15 +51,8 @@ private:
     // Publisher
     ros::Publisher path_pub_;
     ros::Publisher rrt_pub_;
-
-    // Publisher function
-    void publishRrtNode(Rrt* node);
-
-    // RRT variables
-    // TODO: maybe make start and end static variables instead of constantly passing it as a variable
-    //static Coord start;
-    //static Coord end;
-    float _incrementalStep;  // represents input to next state
+    // Publisher functions
+    void publishPath(Rrt* goalNode);
 
     // overall state of map for randomState sampling
     const int numRegionsX = 50;//20;

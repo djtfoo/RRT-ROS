@@ -127,6 +127,7 @@ include_directories(
 
 set(rrt_planner_SRCS
   src/rrt_planner.cpp
+  src/rrtstar_planner.cpp
 )
 
 ## Declare a C++ library

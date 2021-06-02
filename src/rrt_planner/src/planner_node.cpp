@@ -1,5 +1,11 @@
 #include <ros/ros.h>
 #include "rrt_planner.h"
+#include "rrtstar_planner.h"
+
+enum RrtVersion {
+    Basic_RRT,  // 0
+    RRT_Star,   // 1
+};
 
 class RrtPlannerInterface {
 public:
@@ -59,8 +65,19 @@ private:
         if (isValid) {
             ROS_INFO("Starting RRT.");
             // Create RRT Planner
-            RrtPlanner rrtPlanner(*nh_);
-            rrtPlanner.planPath(map_, start, goal);
+            RrtPlanner* rrtPlanner;
+            switch (pathreq->rrt_ver) {
+            case Basic_RRT: {
+                RrtPlanner rrtPlanner(*nh_);
+                rrtPlanner.planPath(map_, start, goal);
+            }
+                break;
+            case RRT_Star: {
+                RrtStarPlanner rrtPlanner(*nh_);
+                rrtPlanner.planPath(map_, start, goal);
+            }
+                break;
+            }
         }
         else
             ROS_INFO("Not starting RRT as start/goal position is invalid.");

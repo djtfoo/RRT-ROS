@@ -7,6 +7,8 @@
 #include "rrt_planner.h"
 #include "rrt/rrt.h"
 
+int Rrt::currId = 0;
+
 #define STATUS_REACHED 1
 #define STATUS_ADVANCED 2
 #define STATUS_TRAPPED 0
@@ -63,6 +65,9 @@ void RrtPlanner::publishPath(Rrt* goalNode) {
     // publish pathMsg to topic
     path_pub_.publish(pathMsg);
 
+    // sleep for a short time after publishing
+    ros::Duration(0.01).sleep();
+
     ROS_INFO("Published Path.");
 }
 
@@ -84,9 +89,6 @@ void RrtPlanner::planPath(nav_msgs::OccupancyGrid::ConstPtr map, const Coord& st
         unpopulatedRegions.push_back(i);
     }
     _incrementalStep = map_->gridsize - 1;
-
-    // sleep for a short time
-    ros::Duration(0.25).sleep();
 
     ROS_INFO("Build RRT.");
 
@@ -121,6 +123,9 @@ void RrtPlanner::publishRrtNode(Rrt* node) {
     // publish RRT node message
     rrt_pub_.publish(rrtnode);
 
+    // sleep for a short time after publishing
+    ros::Duration(0.01).sleep();  // 10 ms
+
     ROS_INFO("Published RRT Node.");
 }
 
@@ -138,13 +143,9 @@ Rrt* RrtPlanner::buildRrt(Rrt* rrt, int iters, const Coord& goal) {
 
         // extend RRT to xRand
         Rrt* xNew = nullptr;
-        char status = extend(rrt, xRand, &xNew, goal);
+        char status = extend(rrt, xRand, &xNew);
         std::cout << "extend status: " << (int)status << std::endl;
         if (status != STATUS_TRAPPED) {  // node was created successfully
-            xNew->setId(i);  // set node id
-            // publish new node to ROS topic (for visualization)
-            publishRrtNode(xNew);
-
             // update RRT state for sampling
             std::cout << "Update RRT state for randomState sampling" << std::endl;
             currState = xNew;
@@ -166,10 +167,6 @@ Rrt* RrtPlanner::buildRrt(Rrt* rrt, int iters, const Coord& goal) {
                std::cout << "REACHED GOAL!!" << std::endl;
                return xNew;
             }
-
-
-            // sleep for a short time
-            ros::Duration(0.002).sleep();
 
             // no. nodes in RRT increased
             i += 1;
@@ -218,7 +215,7 @@ void RrtPlanner::randomState(Coord* state, Coord* currState, const Coord& goal, 
     std::cout << state->_x << ", " << state->_y << std::endl;
 }
 
-int RrtPlanner::extend(Rrt* rrt, const Coord& state, Rrt** xNew, const Coord& goal) {
+int RrtPlanner::extend(Rrt* rrt, const Coord& state, Rrt** xNew) {
     std::cout << "extend: " << std::endl;
 
     // find node in RRT that is nearest to the state
@@ -229,21 +226,29 @@ int RrtPlanner::extend(Rrt* rrt, const Coord& state, Rrt** xNew, const Coord& go
 
     // check if new state is valid
     Coord nState;
-    if (newState(state, xNear, _incrementalStep, &nState, goal)) {
+    if (newState(state, xNear, _incrementalStep, &nState)) {
         std::cout << "newState is valid" << std::endl;
         std::cout << "newState:" << nState._x << ", " << nState._y << std::endl;
         // create new RRT node
         std::cout << "Create new node" << std::endl;
         *xNew = new Rrt(nState, xNear);
-        // add new node to RRT
-        xNear->addChild(*xNew);
-        std::cout << "Added new node to RRT" << std::endl;
+        // add node to RRT
+        addToRrt(rrt, xNear, *xNew);
         if ((*xNew)->equalsState(state))
             return STATUS_REACHED;
         return STATUS_ADVANCED;
     }
 
     return STATUS_TRAPPED;
+}
+
+void RrtPlanner::addToRrt(Rrt* rrt, Rrt* xNear, Rrt* xNew) {
+    // add new node to RRT
+    xNear->addChild(xNew);
+    std::cout << "Added new node to RRT" << std::endl;
+
+    // publish new node to ROS topic (for visualization)
+    publishRrtNode(xNew);
 }
 
 Rrt* RrtPlanner::nearestNeighbour(Rrt* rrt, const Coord& state) {
@@ -278,12 +283,13 @@ Rrt* RrtPlanner::nearestNeighbourSearch(Rrt* rrt, const Coord& state, float* dis
 
 float RrtPlanner::neighbourDistanceMetric(Rrt* rrt, const Coord& state) {
     // distance metric is square of magnitude
-    float xLen = 0.01f * (rrt->getCoord()->_x - state._x);
-    float yLen = 0.01f * (rrt->getCoord()->_y - state._y);
-    return (xLen*xLen + yLen*yLen);
+    //float xLen = 0.01f * (rrt->getCoord()->_x - state._x);
+    //float yLen = 0.01f * (rrt->getCoord()->_y - state._y);
+    //return (xLen*xLen + yLen*yLen);
+    return rrt->distanceSquaredToCoord(state);
 }
 
-bool RrtPlanner::newState(const Coord& state, Rrt* xNear, float input, Coord* nState, const Coord& goal) {
+bool RrtPlanner::newState(const Coord& state, Rrt* xNear, float input, Coord* nState) {
     // TODO: should a state be on any pixel, or a continuous range?
     float vecX = state._x - xNear->getCoord()->_x;
     float vecY = state._y - xNear->getCoord()->_y;
@@ -318,8 +324,7 @@ bool RrtPlanner::newState(const Coord& state, Rrt* xNear, float input, Coord* nS
 bool RrtPlanner::isObstacle(const Coord& coord) {
     int gridX = coord._x / map_->gridsize;
     int gridY = coord._y / map_->gridsize;
-    int gridWidth = map_->width / map_->gridsize;
-    return map_->occupancy[gridY*gridWidth + gridX];
+    return isObstacle(gridX, gridY);
 }
 
 bool RrtPlanner::isObstacle(int gridX, int gridY) {

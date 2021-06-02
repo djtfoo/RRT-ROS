@@ -26,6 +26,7 @@ public:
 
         // add Button
         Button::createButton(Anchor(BottomLeft, 50, 5), 120, 30, 180, 180, 180, "Publish Map", (void*)publishMapCallback);
+        Button::createButton(Anchor(BottomLeft, 200, 5), 120, 30, 180, 180, 180, "Export Map", (void*)exportMapCallback);
 
         // Create window
         window_ = new VisualizerWindow("Custom", width, height);
@@ -123,6 +124,21 @@ private:
         }
         // store the mouse event
         mouseButtonDownEvent = event;
+    }
+
+    // Export map image
+    static void exportMapCallback() {
+        // Crop custom map image from window
+        Mat cropped;
+        Rect myROI(0, 0, width, height);  // region of interest
+        Mat croppedRef(window_->getImage(), myROI);  // crop the full image to that image contained by the rectangle myROI
+        croppedRef.copyTo(cropped);  // copy the data into new matrix
+
+        // Save as custom.jpg
+        imwrite("maps/custom.jpg", cropped);
+
+        // Close window and exit
+        ros::shutdown();
     }
 };
 

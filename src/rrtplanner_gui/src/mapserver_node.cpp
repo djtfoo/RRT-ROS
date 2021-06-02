@@ -26,7 +26,7 @@ public:
 
         //load map file using OpenCV
         Mat img = imread(filename, IMREAD_UNCHANGED);
-        //img.convertTo(img, CV_8U);
+        img.convertTo(img, CV_8U);
         if (img.rows == 0 && img.rows == 0) {
             ROS_INFO("Failed to load file.");
             return false;

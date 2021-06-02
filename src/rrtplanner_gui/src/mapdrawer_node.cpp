@@ -146,7 +146,7 @@ VisualizerWindow* MapDrawerInterface::window_ = nullptr;
 ros::Publisher MapDrawerInterface::map_pub_;
 int MapDrawerInterface::width = 500;
 int MapDrawerInterface::height = 500;
-int MapDrawerInterface::gridSize = 1;
+int MapDrawerInterface::gridSize = 5;
 int MapDrawerInterface::mouseButtonDownEvent;
 
 int main(int argc, char* argv[]) {

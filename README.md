@@ -4,9 +4,15 @@ This is an implementation of Rapidly-exploring Random Tree (RRT) algorithms in C
 ## Nodes and Topics
 ![ROS Topics](docs/topics.png)
 
+## Packages
+- nav_msgs: Contains the Message Description Specifications for this project.
+- rrt_planner: Implements the RRT algorithms. Contains `planner_node` and `pathrequest_node`.
+- rrtplanner_map: Provides the interfaces for serving and visualizing the maps, and drawing custom maps. Contains `visualizer_node`, `mapserver_node` and `mapdrawer_node`.
+
 ## Table of Contents
 - [RRT-ROS](#rrt-ros)
   - [Nodes and Topics](#nodes-and-topics)
+  - [Packages](#packages)
 - [Table of Contents](#table-of-contents)
 - [Prerequisites](#prerequisites)
 - [Build Guide](#build-guide)

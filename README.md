@@ -1,18 +1,26 @@
-# RRT-ROS - Overview
+# RRT-ROS
 This is an implementation of Rapidly-exploring Random Tree (RRT) algorithms in C++ for ROS Melodic. There are ROS nodes for loading and parsing a map image file (JPG/PNG/PGM), planning a path to the goal using RRT, visualizing the map and the built RRT, and an interface for drawing a custom map that can be exported as a JPG file or published directly.
 
 ## Nodes and Topics
 ![ROS Topics](docs/topics.png)
 
+## Packages
+- nav_msgs: Contains the Message Description Specifications for this project.
+- rrt_planner: Implements the RRT algorithms. Contains `planner_node` and `pathrequest_node`.
+- rrtplanner_map: Provides the interfaces for serving and visualizing the maps, and drawing custom maps. Contains `visualizer_node`, `mapserver_node` and `mapdrawer_node`.
+
 ## Table of Contents
 - [RRT-ROS](#rrt-ros)
   - [Nodes and Topics](#nodes-and-topics)
+  - [Packages](#packages)
 - [Table of Contents](#table-of-contents)
 - [Prerequisites](#prerequisites)
 - [Build Guide](#build-guide)
 - [How to Run](#how-to-run)
-  - [Setup nodes](#setup-nodes)
+  - [Setup](#setup)
+  - [Nodes](#nodes)
   - [Start RRT algorithm](#start-rrt-algorithm)
+  - [Visualizer](#visualizer)
   - [Map Drawer](#map-drawer)
 - [Gallery](#gallery)
 - [References](#references)
@@ -134,7 +142,21 @@ rosrun rrtplanner_map mapdrawer_node <map_width> <map_height> <gridsize>
 - Click "Export Map" to save the drawn map to a JPG file. This node will shutdown and exit afterwards.
 
 ## Gallery
-(Add GIFs of map drawer, RRT, RRT*)
+Basic RRT algorithm
+
+![RRT](docs/rrt.gif)
+
+RRT* algorithm
+
+![RRT*](docs/rrtstar.gif)
+
+Visualizer
+
+![Visualizer](docs/visualizer.gif)
+
+Map Drawer
+
+![Map Drawer](docs/mapdrawer.gif)
 
 ## References
 - [Steven M. Lavalle’s RRT web page](http://lavalle.pl/rrt/)

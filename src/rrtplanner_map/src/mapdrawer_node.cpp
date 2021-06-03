@@ -7,10 +7,6 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
-// for OS directories
-#include <sys/types.h>
-#include <sys/stat.h>
-
 #include <nav_msgs/OccupancyGrid.h>
 
 #include "gui/visualizer_window.h"

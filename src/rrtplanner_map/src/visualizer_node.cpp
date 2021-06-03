@@ -121,13 +121,21 @@ private:
             ROS_INFO("Both start and goal position must be set to publish PathRequest.");
             return;
         }
+            ROS_INFO("Hi 1.");
         // Create message
+            ROS_INFO("Hi 2.");
         nav_msgs::PathRequest pathreq;
+            ROS_INFO("Hi 3.");
         pathreq.start_x = (startX_ + 0.5f) * map_->gridsize;
+            ROS_INFO("Hi 4.");
         pathreq.start_y = (startY_ + 0.5f) * map_->gridsize;
+            ROS_INFO("Hi 5.");
         pathreq.goal_x = (goalX_ + 0.5f) * map_->gridsize;
+            ROS_INFO("Hi 6.");
         pathreq.goal_y = (goalY_ + 0.5f) * map_->gridsize;
+            ROS_INFO("Hi 7.");
         pathreq.rrt_ver = rrtVer;
+            ROS_INFO("Hi 8.");
 
         // Publish message
         pathreq_pub_.publish(pathreq);
@@ -167,12 +175,23 @@ private:
     // Mouse Event Callback
     static void processMouseEvent(int event, int mouseX, int mouseY, int flags, void* param) {
 
+        // check if click is within bounds
+        if (mouseX < 0 || mouseX >= map_->width || mouseY < 0 || mouseY >= map_->height) {
+            if (event == EVENT_LBUTTONDOWN) {  // left mouse click
+                // check button click events
+                Button::processButtonClick(mouseX, mouseY);
+            }
+            return;
+        }
+
         // Set start grid
         if (event == EVENT_LBUTTONDOWN) {  // left mouse click
             ROS_INFO("Left Mouse Click");
             // get grid coordinate
             int grid_x = mouseX / map_->gridsize;
             int grid_y = mouseY / map_->gridsize;
+            std::cout << mouseX << ", " << mouseY << std::endl;
+            std::cout << grid_x << ", " << grid_y << std::endl;
 
             // check if grid is valid
             if (!PathRequestHandler::isObstacle(map_, grid_x, grid_y) &&  // selected grid is not an obstacle
@@ -188,10 +207,6 @@ private:
 
                 // draw fill for selected grid
                 fillStartGrid(window_, grid_x, grid_y, map_->gridsize);
-            }
-            // check button click events
-            else {
-                Button::processButtonClick(mouseX, mouseY);
             }
         }
         // Set goal grid

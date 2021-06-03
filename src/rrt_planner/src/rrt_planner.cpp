@@ -88,7 +88,7 @@ void RrtPlanner::planPath(nav_msgs::OccupancyGrid::ConstPtr map, const Coord& st
     for (int i = 0; i < numRegionsX*numRegionsY; ++i) {
         unpopulatedRegions.push_back(i);
     }
-    _incrementalStep = map_->gridsize - 1;
+    _incrementalStep = fmax(map_->gridsize - 1, 1);
 
     ROS_INFO("Build RRT.");
 

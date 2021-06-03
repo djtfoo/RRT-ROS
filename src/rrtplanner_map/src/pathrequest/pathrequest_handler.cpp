@@ -1,5 +1,7 @@
 #include <opencv2/imgproc.hpp>
 
+#include <iostream>
+
 #include "pathrequest_handler.h"
 #include "../msg_handler.h"
 
@@ -11,13 +13,15 @@ bool PathRequestHandler::isWithinBounds(const nav_msgs::OccupancyGrid::ConstPtr&
 
 bool PathRequestHandler::isObstacle(const nav_msgs::OccupancyGrid::ConstPtr& map, int gridX, int gridY) {
 
+    // do a bounds check first
+    if (!isWithinBounds(map, gridX, gridY))
+        return false;
+
     // get grid index
     int idx = gridY * (map->width/map->gridsize) + gridX;
+std::cout << std::endl;
 
     // check if grid is obstacle
     if (map->occupancy[idx])  // is obstacle
         return true;
-
-    // also do a bounds check
-    return isWithinBounds(map, gridX, gridY);
 }

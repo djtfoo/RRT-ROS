@@ -76,6 +76,22 @@ rosrun rrt_planner pathrequest_node <start_x> <start_y> <goal_x> <goal_y> <rrt_v
 
 If a path was found, <output ...>
 
+### Map Drawer
+Custom maps can be drawn using the mapdrawer_node. The custom map can then be exported as an image file to "./maps/custom.jpg", or have its occupancy grid data published directly to the /maps topic.
+  
+When choosing to publish directly, the planner_node and visualizer_node (if wanting visualization) should be running beforehand.
+  
+Parameters can optionally be provided to change the map size and occupancy grid size (if publishing directly). To run the map drawer:
+```
+rosrun rrtplanner_map mapdrawer_node <map_width> <map_height> <gridsize>
+```
+- map_width: the width of the map in pixels.
+- map_height: the height of the map in pixels.
+- gridsize: the size in pixels of the occupancy grid.
+
+Explain how to use the map drawer
+
+  
 ## Screenshots
 Throw in some screenshots
 

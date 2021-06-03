@@ -14,6 +14,11 @@ VisualizerWindow::VisualizerWindow(const char* name, int w, int h) :
     Button::drawButtons(w, h+_bottomBarHeight, this);
 }
 
+VisualizerWindow::~VisualizerWindow() {
+    // Destroy window
+    cvDestroyWindow(_windowName);
+}
+
 void VisualizerWindow::setMouseCallbackFunc(MouseCallback callback) {
     _callback = callback;
     setMouseCallback(_windowName, callback);

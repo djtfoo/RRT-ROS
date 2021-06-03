@@ -24,6 +24,7 @@ friend class Button;
 public:
     // init
     VisualizerWindow(const char* name, int w, int h);
+    ~VisualizerWindow();
     void setMouseCallbackFunc(MouseCallback callback);
 
     void displayWindow();

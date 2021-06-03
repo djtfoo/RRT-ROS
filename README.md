@@ -35,11 +35,11 @@ Use `catkin build` to build the ROS project.
 ```cmd
 > catkin build
 ```
-If the following error shows, run catkin build again.
-<br> (insert here)
+When building for the first time, the following error would occur. Run `catkin build` again to build the packages.
+![First time build error](docs/build_error.png)
 
-If the build is successful, you should see the following:
-<br> (insert here)
+If the build is successful, you should see the following packages generated:
+![Packages list](docs/packages.png)
 
 ## How to Run
 ### Setup

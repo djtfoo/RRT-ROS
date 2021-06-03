@@ -131,9 +131,9 @@ Parameters can optionally be provided to change the map size and occupancy grid 
 ```
 rosrun rrtplanner_map mapdrawer_node <map_width> <map_height> <gridsize>
 ```
-- map_width: the width of the map in pixels.
-- map_height: the height of the map in pixels.
-- gridsize: the size in pixels of the occupancy grid.
+- map_width: the width of the map in pixels. The default value is 500.
+- map_height: the height of the map in pixels. The default value is 500.
+- gridsize: the size in pixels of the occupancy grid. The default value is 5.
 
 #### How to Use:
 - Click and drag with the left mouse button to draw obstacles (in white).

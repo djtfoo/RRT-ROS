@@ -2,7 +2,7 @@
 This is an implementation of Rapidly-exploring Random Tree (RRT) algorithms in C++ for ROS Melodic. There are ROS nodes for loading and parsing a map image file (JPG/PNG/PGM), planning a path to the goal using RRT, visualizing the map and the built RRT, and an interface for drawing a custom map that can be exported as a JPG file or published directly.
 
 ## Nodes and Topics
-(Insert diagram here)
+![ROS Topics](docs/topics.png)
 
 ## Table of Contents
 - [RRT-ROS](#rrt-ros)

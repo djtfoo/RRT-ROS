@@ -16,7 +16,7 @@ VisualizerWindow::VisualizerWindow(const char* name, int w, int h) :
 
 VisualizerWindow::~VisualizerWindow() {
     // Destroy window
-    cvDestroyWindow(_windowName);
+    //cvDestroyWindow(_windowName);
 }
 
 void VisualizerWindow::setMouseCallbackFunc(MouseCallback callback) {

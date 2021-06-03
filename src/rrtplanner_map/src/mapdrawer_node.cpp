@@ -135,7 +135,10 @@ private:
         croppedRef.copyTo(cropped);  // copy the data into new matrix
 
         // Save as custom.jpg
-        imwrite("maps/custom.jpg", cropped);
+        if (imwrite("maps/custom.jpg", cropped))
+            ROS_INFO("Map exported successfully.");
+        else
+            ROS_INFO("An error occurred when exporting the image.");
 
         // Close window and exit
         ros::shutdown();

@@ -96,7 +96,7 @@ The start and goal positions cannot be an obstacle and is checked by planner_nod
 
 #### Output
 The RRT planner begins to build the RRT, with a 5% bias towards sampling the goal state. The vertices (nodes) of the RRT are published to the `/rrtnode` topic as they are generated. If a path is found, it will be printed to the terminal and published to the `/path` topic.
-<br>(show image of output)
+![Path found](docs/pathfound.png)
 
 ------------------
 

@@ -44,7 +44,7 @@ void RrtPlanner::publishPath(Rrt* goalNode) {
         node.parent = trace->getParent()->getId();
         // insert node to path
         path.push_back(node);
-        std::cout << trace->getId() << " ";
+        std::cout << trace->getId() << "(" << node.x << "," << node.y << ")" << " <- ";
         // go to next node
         trace = trace->getParent();
     }
@@ -56,7 +56,7 @@ void RrtPlanner::publishPath(Rrt* goalNode) {
     node.parent = -1;
     // insert root node to path
     path.push_back(node);
-    std::cout << trace->getId() << std::endl;
+    std::cout << trace->getId() << "(" << node.x << "," << node.y << ")" << std::endl;
 
     // assign created path
     nav_msgs::Path pathMsg;

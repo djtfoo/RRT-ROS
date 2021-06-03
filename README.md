@@ -42,7 +42,7 @@ If the build is successful, you should see the following:
 <br> (insert here)
 
 ## How to Run
-### Setup nodes
+### Setup
 Launch roscore in a terminal:
 ```cmd
 roscore
@@ -54,19 +54,23 @@ In each new terminal, source for the local setup file:
 > source devel/setup.bash
 ```
 
-First, run planner_node:
+------------------
+
+### Nodes
+
+First, run `planner_node`:
 
 ```
 rosrun rrt_planner planner_node
 ```
 
-Optionally, run visualizer_node in a new terminal to show a GUI interface to configure the navigation parameters and visualize the tree building on the map:
+Optionally, run `visualizer_node` in a new terminal to show a GUI interface to configure the navigation parameters and visualize the tree building on the map:
 
 ```
 rosrun rrtplanner_map visualizer_node
 ```
 
-Run mapserver_node in a new terminal to load a map image file, generate the occupancy grid from the image, and publish it for the planner and visualizer:
+Run `mapserver_node` in a new terminal to load a map image file, generate the occupancy grid from the image, and publish it to the `/map` topic for the planner and visualizer:
 
 ```
 rosrun rrtplanner_map mapserver_node <path_to_map_image> <gridsize>
@@ -74,11 +78,12 @@ rosrun rrtplanner_map mapserver_node <path_to_map_image> <gridsize>
 - path_to_map_image: the file path (relative or absolute) to the map image file. The image should be PNG/JPG/PGM.
 - gridsize: the size in pixels of the occupancy grid.
 
+------------------
 
 ### Start RRT algorithm
-If using visualizer_node, the user can select the start and goal positions using the interface.
+If using `visualizer_node`, the user can select the start and goal positions using the interface, and select the RRT algorithm to use.
 
-If not using visualizer_node, run pathrequest_node in an open terminal to provide the start and goal positions to start the RRT search:
+Otherwise, run `pathrequest_node` in an open terminal to provide the start and goal positions to start the RRT search:
 
 ```
 rosrun rrt_planner pathrequest_node <start_x> <start_y> <goal_x> <goal_y> <rrt_ver>
@@ -90,25 +95,29 @@ rosrun rrt_planner pathrequest_node <start_x> <start_y> <goal_x> <goal_y> <rrt_v
 The start and goal positions cannot be an obstacle and is checked by planner_node.
 
 #### Output
-The RRT planner begins to build the RRT, with a 5% bias towards sampling the goal state. The vertices (nodes) of the RRT are published to the topic /rrtnode as they are generated. If a path is found, it will be printed to the terminal and published to the topic /path.
-(show image of output)
+The RRT planner begins to build the RRT, with a 5% bias towards sampling the goal state. The vertices (nodes) of the RRT are published to the `/rrtnode` topic as they are generated. If a path is found, it will be printed to the terminal and published to the `/path` topic.
+<br>(show image of output)
+
+------------------
 
 ### Visualizer
-The visualizer_node subscribes to all of the topics and displays and updates a view of the map with the built RRT and the start and goal positions.
+The `visualizer_node` subscribes to all of the topics and displays and updates a view of the map with the built RRT and the start and goal positions.
 
 #### How to Use:
-- Run the visualizer_node.
-- Publish an occupancy grid map (e.g. with mapserver_node or mapdrawer_node) for the visualizer_node to open a window displaying the map.
+- Run `visualizer_node` with rosrun.
+- Publish an occupancy grid map (e.g. with `mapserver_node` or `mapdrawer_node`) for `visualizer_node` to open a window displaying the map.
 - Click with the left mouse button to set a start position.
 - Click with the right mouse button to set a goal position.
 - Click any of the "Plan Path" buttons to publish a path request using the respective RRT algorithm after setting a start and goal position.
 - The visualizer will display the RRT while it gets built by the planner. If a path from the start to the goal is found, it will be highlighted in yellow.
-- After the planner_node has completed, start and goal positions can be set and a "Plan Path" request can be published again, or a new occupany grid map can be published to open a new map window.
+- After the RRT planning has completed, start and goal positions can be set and a "Plan Path" request can be published again, or a new occupany grid map can be published to open a new map window.
+
+------------------
 
 ### Map Drawer
-Custom maps can be drawn using the mapdrawer_node. The custom map can then be exported as an image file to "./maps/custom.jpg", or have its occupancy grid data published directly to the /maps topic.
+Custom maps can be drawn using the `mapdrawer_node`. The custom map can then be exported as an image file to `"./maps/custom.jpg"`, or have its occupancy grid data published directly to the `/maps` topic.
   
-When choosing to publish directly, the planner_node and visualizer_node (if wanting visualization) should be running beforehand.
+When choosing to publish directly, the `planner_node` and `visualizer_node` (if wanting visualization) should already be running before publishing the data.
   
 Parameters can optionally be provided to change the map size and occupancy grid size (if publishing directly). To run the map drawer:
 ```
@@ -121,7 +130,7 @@ rosrun rrtplanner_map mapdrawer_node <map_width> <map_height> <gridsize>
 #### How to Use:
 - Click and drag with the left mouse button to draw obstacles (in white).
 - Click and drag with the right mouse button to erase drawn obstacles.
-- Click "Publish Map" to generate the occupancy grid and publish it to the /map topic. This node will shutdown and exit afterwards.
+- Click "Publish Map" to generate the occupancy grid and publish it to the `/map` topic. This node will shutdown and exit afterwards.
 - Click "Export Map" to save the drawn map to a JPG file. This node will shutdown and exit afterwards.
 
 ## Gallery
